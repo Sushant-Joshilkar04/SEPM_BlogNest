@@ -297,3 +297,30 @@ exports.addLike = async (req,res) => {
         })
     }
 }
+
+exports.getPostBasedOnTags = async (req,res) => {
+    try 
+    {
+        const {tags} = req.body;
+
+        const taggedPosts = await Post.find({
+            tags : {
+                $in : tags
+            }
+        });
+
+        return res.status(200).json({
+            success : true,
+            message : "Posts of similar tags fetched successfully",
+            data : taggedPosts
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}
