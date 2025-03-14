@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Preloader from './components/Preloader';
+import Community from './components/Community';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,7 @@ const App = () => {
               path="/dashboard" 
               element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
             />
+            <Route path='/community' element={<ProtectedRoute> <Community /> </ProtectedRoute>}/>
           </Routes>
           <Footer/>
         </div>

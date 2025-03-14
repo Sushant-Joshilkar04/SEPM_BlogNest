@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   return (
     <AppBar position="sticky" sx={{ background: "#1976D2", paddingX: 2 }}>
@@ -53,16 +54,43 @@ const Navbar = () => {
 
        
         <Box sx={{ display: "flex", gap: 2 }}>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }} onClick={() => navigate("/login")}>
-              Login
-            </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/signup")}>
-              Signup
-            </Button>
-          </motion.div>
+          {
+            !token && 
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }} onClick={() => navigate("/login")}>
+                Login
+              </Button>
+            </motion.div>
+          }
+          
+          {
+            !token && 
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/signup")}>
+                Signup
+              </Button>
+            </motion.div>
+          }
+
+          {
+            token && 
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }} onClick={() => navigate("/community")}>
+                Join Community
+              </Button>
+            </motion.div>
+          }
+
+          {
+            token && 
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/dashboard")}>
+                Dashboard
+              </Button>
+            </motion.div>
+          }
+
+
         </Box>
       </Toolbar>
     </AppBar>
