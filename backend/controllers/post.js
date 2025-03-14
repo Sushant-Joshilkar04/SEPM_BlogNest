@@ -234,3 +234,66 @@ exports.reportpost = async (req,res) => {
         })
     }
 }
+
+exports.addImpression = async (req,res) => {
+    try 
+    {
+        const postId = req.body.postId;
+
+        const postUpdated = await Post.findByIdAndUpdate(postId,{
+            $inc : 
+            { 
+                impressions : 1
+            }
+        },{new : true})
+
+        return res.status(200).json({
+            success : true,
+            message : "Post impressions updated successfully",
+            data : postUpdated
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}
+
+exports.addLike = async (req,res) => {
+    try 
+    {
+        const id = req.body.id;
+        const postId = req.body.postId;
+
+        const postUpdated = await Post.findByIdAndUpdate(postId,{
+            $inc : 
+            { 
+                likes : 1
+            }
+        },{new : true})
+
+        const userUpdated = await User.findByIdAndUpdate(id,{
+            $push : {
+                likedPosts : postId
+            }
+        })
+
+        return res.status(200).json({
+            success : true,
+            message : "Post likes updated successfully",
+            data : postUpdated
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}

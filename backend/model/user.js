@@ -26,7 +26,8 @@ const UserSchema = new mongoose.Schema({
 posts : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Post'}],
 community : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Community'}],
 adminOf : {type : mongoose.Schema.Types.ObjectId , ref : 'Community'},
-avatar : String
+avatar : String,
+likedPosts : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Post'} ]
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);
