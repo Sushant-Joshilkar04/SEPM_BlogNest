@@ -1,13 +1,39 @@
 const User = require('../model/user')
 const Post = require('../model/post')
 const Community = require('../model/community')
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
+
+const fileUpload = async (file, folder, height=null, quality=null) => {
+    try {
+        const options = { folder };
+        if (height) {
+            options.height = height;
+        }
+        if (quality) {
+            options.quality = quality;
+        }
+
+        options.resource_type = "auto";
+
+        const response = await cloudinary.uploader.upload(file.tempFilePath, options);
+
+        return response;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
 
 exports.createpost = async (req,res)=>{
     try 
     {
+        const banner = req.files.banner;
         const {id,title,tags,community=null,content} = req.body;
 
-        const postCreated = await Post.create({title : title,author : id,tags : tags,community : community,content : content});
+        const bannerUploaded = await fileUpload(banner,process.env.FOLDER);
+
+        const postCreated = await Post.create({title : title,author : id,tags : tags,community : community,content : content,banner : bannerUploaded.url});
         const userUpdated = await User.findByIdAndUpdate(id,{
             $push : {
                 posts : postCreated._id

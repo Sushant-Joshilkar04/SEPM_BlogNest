@@ -31,7 +31,8 @@ exports.signup = async (req, res) => {
       lastName,
       email,
       password: hashedPassword,
-      role: role || "user"
+      role: role || "user",
+      avatar : `http://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`
     });
 
     await newUser.save();

@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true 
-},
+}, 
   password: { 
     type: String, 
     required: true 
@@ -25,7 +25,8 @@ const UserSchema = new mongoose.Schema({
 },
 posts : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Post'}],
 community : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Community'}],
-adminOf : {type : mongoose.Schema.Types.ObjectId , ref : 'Community'}
+adminOf : {type : mongoose.Schema.Types.ObjectId , ref : 'Community'},
+avatar : String
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);

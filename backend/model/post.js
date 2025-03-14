@@ -10,7 +10,8 @@ const schema = new mongoose.Schema({
     impressions : { type : Number , default : 0},
     content : String,
     isValid : { type : Boolean , default : true },
-    reportCount : {type : Number, default : 1}
+    reportCount : {type : Number, default : 1},
+    banner : String
 })
 
 module.exports = mongoose.model('Post',schema);
