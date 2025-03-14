@@ -3,6 +3,7 @@ const Post = require('../model/post')
 const Community = require('../model/community');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const {deletePost} = require('../controllers/post')
 require("dotenv").config();
 
 exports.signup = async (req, res) => {
@@ -113,3 +114,50 @@ exports.getUserById = async (req,res) => {
           })
       }  
   }
+
+exports.getReportedPost = async (req,res) => {
+  try 
+  {
+      const user = await Post.find({isValid : false});
+  
+      return res.status(200).json({
+          success : true,
+          message : "Reported videos fetched successfully",
+          data : user
+      })
+  }
+  catch(error)
+  {
+      console.log(error.message);
+      return res.status(500).json({
+          success : false,
+          message : "Internal Server Error"
+      })
+  }  
+}
+
+exports.approvePost = async (req,res) => {
+  try 
+  {
+      const postId = req.body.postId;
+
+      const postUpdated = await Post.findByIdAndUpdate(postId,{
+        isValid : true,
+        reportCount : 0
+      })
+  
+      return res.status(200).json({
+          success : true,
+          message : "Post approved successfully",
+      })
+  }
+  catch(error)
+  {
+      console.log(error.message);
+      return res.status(500).json({
+          success : false,
+          message : "Internal Server Error"
+      })
+  } 
+}
+

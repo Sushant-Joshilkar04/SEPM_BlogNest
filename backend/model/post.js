@@ -9,6 +9,8 @@ const schema = new mongoose.Schema({
     likes : { type : Number , default : 0} ,
     impressions : { type : Number , default : 0},
     content : String,
+    isValid : { type : Boolean , default : true },
+    reportCount : {type : Number, default : 1}
 })
 
 module.exports = mongoose.model('Post',schema);

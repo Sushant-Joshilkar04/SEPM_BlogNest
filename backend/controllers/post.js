@@ -171,3 +171,40 @@ exports.updatePostContent = async (req,res) =>{
         })
     }
 }
+
+
+exports.reportpost = async (req,res) => {
+    try 
+    {
+        const postId = req.body.postId;
+
+        const postUpdated = await Post.findByIdAndUpdate(postId,{
+            $inc : 
+            { 
+                reportCount : 1
+            }
+        },{new : true})
+
+        if(postUpdated.reportCount>=10)
+        {
+            await Post.findByIdAndUpdate(postId,{
+                isValid : false
+            })
+            
+        }
+        
+        return res.status(200).json({
+            success : true,
+            message : "Post reported successfully",
+            data : postUpdated
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}
