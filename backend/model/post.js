@@ -3,11 +3,12 @@ const mongoose = require('mongoose');
 const schema = new mongoose.Schema({
     title : String,
     author : { type : mongoose.Schema.Types.ObjectId , ref : 'User'} ,
-    createdAt : Date.now,
+    createdAt : { type : Date , default : Date.now},
     tags : [{type : String}],
     community : { type : mongoose.Schema.Types.ObjectId , ref : 'Community'},
-    likes : Number,
-    impressions : Number,
+    likes : { type : Number , default : 0} ,
+    impressions : { type : Number , default : 0},
+    content : String,
 })
 
 module.exports = mongoose.model('Post',schema);
