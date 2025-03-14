@@ -46,7 +46,7 @@ exports.getAllposts = async (req,res) => {
 
         return res.status(200).json({
             success : true,
-            message : "Post created successfully",
+            message : "Post fetched successfully",
             data : allPost
         })
     }
@@ -108,6 +108,58 @@ exports.deletePost = async (req,res) =>{
             success : true,
             message : "Post deleted successfully",
             data : postDeleted
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}
+
+exports.updatePostTitle = async (req,res) =>{
+    try 
+    {
+        const postId = req.body.postId;
+        const title = req.body.title;
+
+        const postUpdated = await Post.findByIdAndUpdate(postId,{
+            title : title
+        },{new : true})
+        
+        return res.status(200).json({
+            success : true,
+            message : "Post title updated successfully",
+            data : postUpdated
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }
+}
+
+exports.updatePostContent = async (req,res) =>{
+    try 
+    {
+        const postId = req.body.postId;
+        const content = req.body.content;
+
+        const postUpdated = await Post.findByIdAndUpdate(postId,{
+            content : content
+        },{new : true})
+        
+        return res.status(200).json({
+            success : true,
+            message : "Post content updated successfully",
+            data : postUpdated
         })
     }
     catch(error)

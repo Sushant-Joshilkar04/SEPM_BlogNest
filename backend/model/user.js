@@ -24,7 +24,8 @@ const UserSchema = new mongoose.Schema({
     default: "user" 
 },
 posts : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Post'}],
-community : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Communit'}]
+community : [ {type : mongoose.Schema.Types.ObjectId , ref : 'Community'}],
+adminOf : {type : mongoose.Schema.Types.ObjectId , ref : 'Community'}
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);

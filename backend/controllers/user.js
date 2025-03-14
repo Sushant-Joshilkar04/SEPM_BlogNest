@@ -1,4 +1,6 @@
 const User = require("../model/user");
+const Post = require('../model/post')
+const Community = require('../model/community');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -6,6 +8,7 @@ require("dotenv").config();
 exports.signup = async (req, res) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, role } = req.body;
+
 
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "Please fill in all fields." });
@@ -32,7 +35,7 @@ exports.signup = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ message: "User registered successfully." });
+    res.status(201).json({ message: "User registered successfully.", data : newUser });
   } catch (error) {
     res.status(500).json({ message: "Server error." });
   }
@@ -67,3 +70,46 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
+exports.getAllUser = async (req,res) => {
+try 
+    {
+        const allUsers = await User.find({}).populate('posts').populate('community').exec();
+    
+        return res.status(200).json({
+            success : true,
+            message : "Users fetched successfully",
+            data : allUsers
+        })
+    }
+    catch(error)
+    {
+        console.log(error.message);
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error"
+        })
+    }  
+}
+
+exports.getUserById = async (req,res) => {
+  try 
+      {
+          const id = req.params.id;
+          const user = await User.find({_id : id}).populate('posts').populate('community').exec();
+      
+          return res.status(200).json({
+              success : true,
+              message : "User fetched successfully",
+              data : user
+          })
+      }
+      catch(error)
+      {
+          console.log(error.message);
+          return res.status(500).json({
+              success : false,
+              message : "Internal Server Error"
+          })
+      }  
+  }
