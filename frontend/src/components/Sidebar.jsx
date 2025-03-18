@@ -1,33 +1,83 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Edit, Users, User, Menu, X } from 'lucide-react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Edit, Users, User, Menu, X ,LogOut} from 'lucide-react';
 import { Avatar } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const menuItems = [
-  { name: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
-  { name: 'Create a Blog', icon: <Edit size={20} />, path: '/create-blog' },
-  { name: 'Join Community', icon: <Users size={20} />, path: '/join-community' },
-  { name: 'User Profile', icon: <User size={20} />, path: '/user-profile' },
-];
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [screenWidth, setScreenWidth] = useState(window.innerWidth); 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
-  // Handle screen resize
+  const handleLogout = () => {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    navigate('/login');
+  };
+
+  
   useEffect(() => {
     const handleResize = () => setScreenWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close mobile sidebar on route change
   useEffect(() => {
     setIsMobileOpen(false);
   }, [location]);
+
+  const menuItems = [
+    { name: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
+    { name: 'Create a Blog', icon: <Edit size={20} />, path: '/create-blog' },
+    { name: 'Join Community', icon: <Users size={20} />, path: '/join-community' },
+    { 
+      name: 'Profile', 
+      icon: <User size={20} />, 
+      path: '/profile' 
+    },
+    { 
+      name: 'Logout', 
+      icon: <LogOut size={20} />, 
+      onClick: handleLogout 
+    }
+  ];
+
+  const renderMenuItem = (item, index) => {
+    if (item.onClick) {
+      return (
+        <div
+          key={index}
+          onClick={item.onClick}
+          className={`flex items-center space-x-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 text-gray-600 hover:bg-gray-100`}
+        >
+          {item.icon}
+          {!isDesktopCollapsed && <span className="font-medium">{item.name}</span>}
+        </div>
+      );
+    }
+
+    return (
+      <NavLink
+        key={index}
+        to={item.path}
+        className={({ isActive }) =>
+          `flex items-center space-x-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 ${
+            isActive || location.pathname === item.path
+              ? 'bg-blue-500 text-white shadow-lg'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`
+        }
+      >
+        {item.icon}
+        {!isDesktopCollapsed && <span className="font-medium">{item.name}</span>}
+      </NavLink>
+    );
+  };
 
   return (
     <>
@@ -75,34 +125,9 @@ const Sidebar = () => {
 
         {/* Menu */}
         <nav className="space-y-2 flex-1">
-          {menuItems.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center space-x-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 ${
-                  isActive || location.pathname === item.path
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`
-              }
-            >
-              {item.icon}
-              {!isDesktopCollapsed && <span className="font-medium">{item.name}</span>}
-            </NavLink>
-          ))}
+          {menuItems.map((item, index) => renderMenuItem(item, index))}
         </nav>
 
-        {/* User Profile */}
-        {!isDesktopCollapsed && (
-          <div className="flex items-center p-3 bg-gray-100 rounded-lg space-x-3">
-            <Avatar alt="User" src="/user.jpg" />
-            <div>
-              <p className="font-semibold">John Doe</p>
-              <p className="text-sm text-gray-500">View Profile</p>
-            </div>
-          </div>
-        )}
       </div>
 
       
@@ -129,31 +154,13 @@ const Sidebar = () => {
             {/* Menu */}
             <nav className="space-y-2 flex-1">
               {menuItems.map((item, index) => (
-                <NavLink
-                  key={index}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center space-x-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 ${
-                      isActive || location.pathname === item.path
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  {item.icon}
-                  <span className="font-medium">{item.name}</span>
-                </NavLink>
+                <div key={index} onClick={item.onClick}>
+                  {renderMenuItem(item, index)}
+                </div>
               ))}
             </nav>
 
-            {/* User Profile */}
-            <div className="flex items-center p-3 bg-gray-100 rounded-lg space-x-3">
-              <Avatar alt="User" src="/user.jpg" />
-              <div>
-                <p className="font-semibold">John Doe</p>
-                <p className="text-sm text-gray-500">View Profile</p>
-              </div>
-            </div>
+           
           </motion.div>
         )}
       </AnimatePresence>

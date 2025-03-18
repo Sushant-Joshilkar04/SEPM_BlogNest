@@ -72,20 +72,13 @@ const Navbar = () => {
             </motion.div>
           }
 
-          {
-            token && 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }} onClick={() => navigate("/community")}>
-                Join Community
-              </Button>
-            </motion.div>
-          }
+         
 
           {
             token && 
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/dashboard")}>
-                Dashboard
+              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/profile")}>
+                User Profile
               </Button>
             </motion.div>
           }

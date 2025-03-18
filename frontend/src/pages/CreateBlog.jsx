@@ -160,9 +160,7 @@ const CreateBlog = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-7xl mx-auto"
         >
-          <Typography variant="h4" className="mb-6 text-center font-bold">
-            Create New Blog
-          </Typography>
+          
 
           <AnimatePresence>
             {error && (

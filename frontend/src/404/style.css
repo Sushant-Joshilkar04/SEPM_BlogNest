@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Poppins:wght@400;600&display=swap');
+
+.page_404 { 
+  padding: 40px 0; 
+  background: #fff; 
+  font-family: 'Arvo', serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.page_404 img { 
+  width: 100%;
+}
+
+.four_zero_four_bg {
+  background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+  height: 400px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.four_zero_four_bg h1 {
+  font-size: 120px;
+  font-family: 'Abril Fatface', cursive;
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.four_zero_four_bg h3 {
+  font-size: 80px;
+}
+
+.link_404 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+  color: white !important;
+  padding: 12px 30px;
+  border-radius: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.link_404:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.contant_box_404 { 
+  margin-top: -50px;
+}
+
+.contant_box_404 h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 2.5rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.contant_box_404 p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.25rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .four_zero_four_bg {
+    height: 300px;
+  }
+
+  .four_zero_four_bg h1 {
+    font-size: 80px;
+  }
+
+  .four_zero_four_bg h3 {
+    font-size: 40px;
+  }
+
+  .contant_box_404 h3 {
+    font-size: 2rem;
+  }
+
+  .contant_box_404 p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .four_zero_four_bg {
+    height: 200px;
+  }
+
+  .four_zero_four_bg h1 {
+    font-size: 60px;
+  }
+
+  .four_zero_four_bg h3 {
+    font-size: 30px;
+  }
+
+  .link_404 {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+  }
+}
+
