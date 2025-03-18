@@ -67,7 +67,12 @@ exports.login = async (req, res) => {
       expiresIn: "1d"
     });
 
-    res.status(200).json({ message: "Login successful", token, role: user.role });
+    res.status(200).json({ message: "Login successful", token, user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+
+    } });
   } catch (error) {
     res.status(500).json({ message: "Server error." });
   }
@@ -123,7 +128,7 @@ exports.getReportedPost = async (req,res) => {
   
       return res.status(200).json({
           success : true,
-          message : "Reported videos fetched successfully",
+          message : "Reported s fetched successfully",
           data : user
       })
   }

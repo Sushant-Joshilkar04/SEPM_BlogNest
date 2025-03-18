@@ -45,7 +45,7 @@ app.use(fileUpload({
 app.use(bodyParser.json());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
-app.use('/api/post',postRouter);
+app.use('/api/posts',postRouter);
 app.use('/api/community',communityRouter);
 
 

@@ -36,8 +36,11 @@ const Login = () => {
 
     try {
         const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+        console.log(formData);
+        
         toast.success("Login successful!");
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         setTimeout(() => {
           navigate("/dashboard");
         }, 1000); 

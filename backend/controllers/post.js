@@ -4,66 +4,68 @@ const Community = require('../model/community')
 const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
 
-const fileUpload = async (file, folder, height=null, quality=null) => {
+exports.createpost = async (req, res) => {
     try {
-        const options = { folder };
-        if (height) {
-            options.height = height;
+        const { id, title, tags, community, content, bannerUrl, isDraft } = req.body;
+        console.log("Received data:", req.body);
+
+        if (!id || !title || !content || !bannerUrl) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields"
+            });
         }
-        if (quality) {
-            options.quality = quality;
+
+        // Parse tags
+        let parsedTags = [];
+        try {
+            parsedTags = tags ? JSON.parse(tags) : [];
+        } catch (error) {
+            console.log("Tags parsing error:", error);
+            parsedTags = [];
         }
 
-        options.resource_type = "auto";
+        const post = await Post.create({
+            title,
+            content,
+            banner: bannerUrl,
+            author: id,
+            tags: parsedTags,
+            community: community || null,
+            isDraft: Boolean(isDraft)
+        });
 
-        const response = await cloudinary.uploader.upload(file.tempFilePath, options);
+        // Update user's posts array
+        await User.findByIdAndUpdate(
+            id,
+            { $push: { posts: post._id } },
+            { new: true }
+        );
 
-        return response;
+        // Update community if specified
+        if (community) {
+            await Community.findByIdAndUpdate(
+                community,
+                { $push: { posts: post._id } },
+                { new: true }
+            );
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: isDraft ? "Blog saved as draft" : "Blog published successfully",
+            data: post
+        });
+
     } catch (error) {
-        throw new Error(error.message);
+        console.error("Create post error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
     }
 };
-
-
-exports.createpost = async (req,res)=>{
-    try 
-    {
-        const banner = req.files.banner;
-        const {id,title,tags,community=null,content} = req.body;
-
-        const bannerUploaded = await fileUpload(banner,process.env.FOLDER);
-
-        const postCreated = await Post.create({title : title,author : id,tags : tags,community : community,content : content,banner : bannerUploaded.url});
-        const userUpdated = await User.findByIdAndUpdate(id,{
-            $push : {
-                posts : postCreated._id
-            }
-        },{new : true});
-
-        if(community)
-        {
-            const communityUpdated = await Community.findByIdAndUpdate(community,{
-                $push : 
-                {
-                    posts : postCreated._id
-                }
-            })
-        }
-
-        return res.status(200).json({
-            success : true,
-            message : "Post created successfully"
-        })
-    }
-    catch(error)
-    {
-        console.log(error.message);
-        return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
-    }
-}
 
 exports.getAllposts = async (req,res) => {
     try 
