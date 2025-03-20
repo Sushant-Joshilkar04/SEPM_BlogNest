@@ -45,7 +45,6 @@ const Signup = () => {
             setTimeout(() => {
               navigate("/login"); 
             }, 1000); 
-            // console.log("Signup Response:", response.data);
           } catch (error) {
             toast.error(error.response?.data?.message || "Signup failed!");
             console.error("Signup Error:", error);

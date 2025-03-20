@@ -46,7 +46,7 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Please enter email and password." });
@@ -57,7 +57,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
-    
+    // Check if the role matches
+    if (user.role !== role) {
+      return res.status(400).json({ message: "Invalid role for this account." });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials." });
@@ -67,17 +71,21 @@ exports.login = async (req, res) => {
       expiresIn: "1d"
     });
 
-    res.status(200).json({ message: "Login successful", token, user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-
-    } });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error." });
   }
 };
-
 exports.getAllUser = async (req,res) => {
 try 
     {

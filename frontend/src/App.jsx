@@ -17,8 +17,9 @@ import CreateBlog from './pages/CreateBlog';
 import Blog from './pages/Blog'
 import UserBlog from './pages/UserBlog';
 import NotFound from './pages/NotFound';
-
-// Create a wrapper component to handle layout
+import AuthPage from './pages/AuthPage';
+import Admin from './pages/Admin';
+import AdminDashboard from './pages/AdminDashboard'
 const AppLayout = ({ children }) => {
   const location = useLocation();
   const is404Page = location.pathname !== '/' && !Object.keys(routes).includes(location.pathname);
@@ -41,6 +42,7 @@ const routes = {
   '/': Hero,
   '/login': Login,
   '/signup': Signup,
+  '/auth': AuthPage,
   '/about': About,
   '/contact': Contact,
   '/dashboard': Dashboard,
@@ -57,7 +59,7 @@ const App = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -74,8 +76,11 @@ const App = () => {
               <Route path="/" element={<Hero />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/auth" element={<AuthPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/Admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path='/join-community' element={<ProtectedRoute><Community /></ProtectedRoute>} />
               <Route path='/create-blog' element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
@@ -83,6 +88,7 @@ const App = () => {
               <Route path="/blog/:id" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
               <Route path="/profile/blog/:id" element={<ProtectedRoute><UserBlog /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
+
             </Routes>
           </AppLayout>
         </div>

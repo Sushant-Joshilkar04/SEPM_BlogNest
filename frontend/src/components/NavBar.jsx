@@ -7,10 +7,15 @@ const Navbar = () => {
   const token = localStorage.getItem("token");
 
   return (
-    <AppBar position="sticky" sx={{ background: "#1976D2", paddingX: 2 }}>
+    <AppBar 
+      position="static" 
+      elevation={0}
+      sx={{ 
+        background: 'linear-gradient(90deg, #e2e2e2, #c9d6ff)',
+        padding: "1rem 0",
+      }}
+    >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        
-        
         <Box
           display="flex"
           alignItems="center"
@@ -21,13 +26,24 @@ const Navbar = () => {
           onClick={() => navigate("/")}
           sx={{ cursor: "pointer" }}
         >
-          <Typography variant="h5" fontWeight="bold" sx={{ color: "#fff" }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: "'Abril Fatface', cursive",
+              color: '#1976D2',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+              letterSpacing: '1px'
+            }}
+          >
             BlogNest
           </Typography>
         </Box>
 
-       
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 4 }}>
+        <Box sx={{ 
+          display: { xs: "none", md: "flex" }, 
+          gap: 4,
+          alignItems: 'center'
+        }}>
           {[
             { name: "Home", path: "/" },
             { name: "About Us", path: "/about" },
@@ -36,15 +52,30 @@ const Navbar = () => {
             <Typography
               key={index}
               component={motion.p}
-              whileHover={{ scale: 1.1, color: "#FFD700" }}
+              whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 200 }}
+              transition={{ type: "spring", stiffness: 300 }}
               onClick={() => navigate(item.path)}
               sx={{
                 cursor: "pointer",
-                color: "#fff",
-                fontSize: "16px",
+                color: '#1976D2',
+                fontSize: "1rem",
+                fontFamily: "'Poppins', sans-serif",
                 fontWeight: "500",
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '0%',
+                  height: '2px',
+                  bottom: -2,
+                  left: 0,
+                  backgroundColor: '#1976D2',
+                  transition: 'width 0.3s ease'
+                },
+                '&:hover::after': {
+                  width: '100%'
+                }
               }}
             >
               {item.name}
@@ -52,38 +83,62 @@ const Navbar = () => {
           ))}
         </Box>
 
-       
         <Box sx={{ display: "flex", gap: 2 }}>
-          {
-            !token && 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }} onClick={() => navigate("/login")}>
-                Login
+          {!token && (
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                variant="contained" 
+                onClick={() => navigate("/auth")}
+                sx={{
+                  background: 'linear-gradient(45deg, #1976D2, #2196F3)',
+                  borderRadius: '50px',
+                  padding: '8px 24px',
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 500,
+                  boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #1565C0, #1976D2)',
+                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
+                  }
+                }}
+              >
+                Sign In
               </Button>
             </motion.div>
-          }
-          
-          {
-            !token && 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/signup")}>
-                Signup
+          )}
+
+          {token && (
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                variant="contained"
+                onClick={() => navigate("/profile")}
+                sx={{
+                  background: 'linear-gradient(45deg, #1976D2, #2196F3)',
+                  borderRadius: '50px',
+                  padding: '8px 24px',
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 500,
+                  boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #1565C0, #1976D2)',
+                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
+                  }
+                }}
+              >
+                Profile
               </Button>
             </motion.div>
-          }
-
-         
-
-          {
-            token && 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="contained" sx={{ backgroundColor: "#FFC107" }} onClick={() => navigate("/profile")}>
-                User Profile
-              </Button>
-            </motion.div>
-          }
-
-
+          )}
         </Box>
       </Toolbar>
     </AppBar>

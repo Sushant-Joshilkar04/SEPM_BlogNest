@@ -4,7 +4,6 @@ require('dotenv').config()
 
 exports.auth = async (req, res, next) => {
     try {
-        // Get token from Authorization header
         const authHeader = req.headers.authorization;
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,7 +13,6 @@ exports.auth = async (req, res, next) => {
             });
         }
 
-        // Extract the token (remove 'Bearer ' prefix)
         const token = authHeader.split(' ')[1];
 
         if (!token) {
@@ -25,10 +23,9 @@ exports.auth = async (req, res, next) => {
         }
 
         try {
-            // Verify token
+        
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             
-            // Add user info to request
             req.body.id = decoded.id;
             req.body.role = decoded.role;
             
