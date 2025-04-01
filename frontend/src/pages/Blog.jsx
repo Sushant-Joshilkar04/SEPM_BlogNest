@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
+  Box,
+  Container,
   Typography, 
   IconButton, 
   Chip, 
@@ -11,11 +13,14 @@ import {
   DialogActions,
   Button,
   Alert,
-  Snackbar 
+  Snackbar,
+  Paper,
+  Avatar,
+  Divider
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { ThumbUp, Flag } from '@mui/icons-material';
-import Sidebar from '../components/Sidebar';
+import { ThumbUp, Flag, AccessTime, Person } from '@mui/icons-material';
+import { UserDock } from '../components/Dock';
 import axios from 'axios';
 
 const Blog = () => {
@@ -38,7 +43,9 @@ const Blog = () => {
       const response = await axios.get(`http://localhost:5000/api/posts/getpost/${id}`);
       if (response.data.success) {
         setPost(response.data.data[0]); 
-        console.log(response.data.data[0])
+        
+        // Add impression
+        await axios.post('http://localhost:5000/api/posts/addimpressions', { postId: id });
       }
     } catch (error) {
       console.error('Error fetching post:', error);
@@ -144,129 +151,282 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </div>
+      <Box 
+        sx={{ 
+          minHeight: "100vh", 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)"
+        }}
+      >
+        <CircularProgress sx={{ color: "#2D31FA" }} />
+      </Box>
     );
   }
 
   if (error || !post) {
     return (
-      <Typography color="error" className="text-center mt-8">
-        {error || 'Post not found'}
-      </Typography>
+      <Box 
+        sx={{ 
+          minHeight: "100vh", 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)"
+        }}
+      >
+        <Typography color="error" variant="h6">
+          {error || 'Post not found'}
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 p-4 md:ml-64 transition-all duration-300">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-7xl mx-auto"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column - Image */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="w-full h-[400px] rounded-lg overflow-hidden"
-            >
-              <img
-                src={post.banner}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+        background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
+        pb: 10,
+        pt: 2,
+      }}
+    >
+      {/* Wave Background - Top */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "30%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
+          borderBottomLeftRadius: "50% 20%",
+          borderBottomRightRadius: "50% 20%",
+          transform: "scale(1.5)",
+          zIndex: 0,
+        }}
+      />
 
-            {/* Right Column - Content */}
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
+        <Paper 
+          elevation={0}
+          sx={{ 
+            borderRadius: 3, 
+            overflow: "hidden",
+            bgcolor: "white",
+            border: "1px solid rgba(77, 97, 252, 0.08)",
+            boxShadow: "0 8px 25px rgba(77, 97, 252, 0.12)",
+          }}
+        >
+          {/* Banner Image */}
+          <Box 
+            component="img"
+            src={post.banner}
+            alt={post.title}
+            sx={{
+              width: "100%",
+              height: { xs: "200px", sm: "300px", md: "400px" },
+              objectFit: "cover",
+            }}
+          />
+
+          {/* Content Section */}
+          <Box sx={{ p: { xs: 3, md: 5 } }}>
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <Typography variant="h4" gutterBottom>
+              <Typography 
+                variant="h3" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: "#333",
+                  mb: 3,
+                  wordBreak: "break-word"
+                }}
+              >
                 {post.title}
               </Typography>
-              
-              <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                By {[post.author?.firstName, " ",post.author?.lastName]|| 'Unknown Author'}
-              </Typography>
 
-              <div className="flex flex-wrap gap-2 my-4">
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Person sx={{ color: "#2D31FA", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: "#555" }}>
+                    {post.author?.firstName} {post.author?.lastName || 'Unknown Author'}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <AccessTime sx={{ color: "#2D31FA", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: "#555" }}>
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 4 }}>
                 {post.tags?.map((tag, idx) => (
                   <Chip
                     key={idx}
                     label={tag}
-                    color="primary"
-                    variant="outlined"
+                    size="small"
+                    sx={{ 
+                      background: "rgba(45, 49, 250, 0.06)",
+                      borderColor: "rgba(45, 49, 250, 0.3)",
+                      color: "#2D31FA",
+                      fontWeight: 500,
+                    }}
                   />
                 ))}
-              </div>
+              </Box>
 
-              <Typography variant="body1" className="mt-4 flex-grow">
+              <Divider sx={{ my: 4, borderColor: "rgba(0, 0, 0, 0.08)" }} />
+
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: "#444",
+                  lineHeight: 1.8,
+                  fontSize: "1.05rem",
+                  whiteSpace: "pre-line"
+                }}
+              >
                 {post.content}
               </Typography>
 
-              <div className="flex items-center justify-between mt-6">
-                <div className="flex items-center gap-2">
-                  <IconButton 
-                    color={isLiked ? "primary" : "default"}
-                    onClick={handleLike}
-                    disabled={isLiked}
-                  >
-                    <ThumbUp />
-                  </IconButton>
-                  <Typography variant="body2">
+              <Divider sx={{ my: 4, borderColor: "rgba(0, 0, 0, 0.08)" }} />
+
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <motion.div whileHover={{ scale: 1.1 }}>
+                    <IconButton 
+                      onClick={handleLike}
+                      disabled={isLiked}
+                      sx={{
+                        bgcolor: isLiked ? "rgba(45, 49, 250, 0.1)" : "transparent",
+                        "&:hover": {
+                          bgcolor: "rgba(45, 49, 250, 0.08)"
+                        }
+                      }}
+                    >
+                      <ThumbUp 
+                        sx={{ 
+                          color: isLiked ? "#2D31FA" : "#888",
+                          fontSize: 22
+                        }} 
+                      />
+                    </IconButton>
+                  </motion.div>
+                  <Typography variant="body2" fontWeight="500" sx={{ color: "#555" }}>
                     {post.likes || 0} likes
                   </Typography>
-                </div>
+                </Box>
                 
-                <IconButton 
-                  color="error" 
-                  onClick={() => setReportDialogOpen(true)}
-                >
-                  <Flag />
-                </IconButton>
-              </div>
+                <motion.div whileHover={{ scale: 1.1 }}>
+                  <IconButton 
+                    onClick={() => setReportDialogOpen(true)}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "rgba(211, 47, 47, 0.08)"
+                      }
+                    }}
+                  >
+                    <Flag sx={{ color: "#d32f2f", fontSize: 22 }} />
+                  </IconButton>
+                </motion.div>
+              </Box>
             </motion.div>
-          </div>
-        </motion.div>
+          </Box>
+        </Paper>
+      </Container>
 
-        {/* Report Dialog */}
-        <Dialog
-          open={reportDialogOpen}
-          onClose={() => setReportDialogOpen(false)}
-        >
-          <DialogTitle>Report Post</DialogTitle>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to report this post? This action cannot be undone.
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setReportDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleReport} color="error">Report</Button>
-          </DialogActions>
-        </Dialog>
+      {/* Wave Background - Bottom */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "30%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
+          borderTopLeftRadius: "50% 30%",
+          borderTopRightRadius: "50% 30%",
+          transform: "scale(1.5)",
+          zIndex: 0,
+        }}
+      />
 
-        {/* Snackbar for notifications */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          <Alert 
-            onClose={() => setSnackbar({ ...snackbar, open: false })} 
-            severity={snackbar.severity}
+      {/* Report Dialog */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
+          }
+        }}
+      >
+        <DialogTitle sx={{ bgcolor: "#f8f9ff", color: "#333", fontWeight: 600 }}>
+          Report Post
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Typography variant="body1">
+            Are you sure you want to report this post? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={() => setReportDialogOpen(false)}
+            sx={{ 
+              color: "#555",
+              "&:hover": {
+                bgcolor: "rgba(0, 0, 0, 0.04)"
+              }
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </main>
-    </div>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleReport} 
+            variant="contained"
+            sx={{ 
+              bgcolor: "#d32f2f",
+              "&:hover": {
+                bgcolor: "#b71c1c"
+              }
+            }}
+          >
+            Report
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ 
+            borderRadius: 2,
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            width: "100%" 
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <UserDock />
+    </Box>
   );
 };
 

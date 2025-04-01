@@ -175,3 +175,22 @@ exports.approvePost = async (req,res) => {
   } 
 }
 
+exports.deletePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const post = await Post.findByIdAndDelete(postId);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Post deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete post error:', error);
+    res.status(500).json({ message: 'Error deleting post' });
+  }
+};
+

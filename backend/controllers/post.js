@@ -3,6 +3,7 @@ const Post = require('../model/post')
 const Community = require('../model/community')
 const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
+const mongoose = require('mongoose');
 
 exports.createpost = async (req, res) => {
     try {
@@ -111,42 +112,63 @@ exports.getPostById = async (req,res) => {
     }
 }
 
-exports.deletePost = async (req,res) =>{
-    try 
-    {
-        const postId = req.body.postId;
-
-        const postDeleted = await Post.findByIdAndDelete({_id : postId},{new : true});
-        const userUpdated = await User.findByIdAndUpdate({_id : postDeleted.author},{
-            $pull : {
-                posts : postDeleted._id
-            }
-        })
-
-        if(postDeleted.community)
-        {
-            const communityUpdated = await Community.findByIdAndUpdate({_id : postDeleted.community},{
-                $pull : {
-                    posts : postDeleted._id
-                }
-            })
+exports.deletePost = async (req, res) => {
+    try {
+      const { postId } = req.body;
+      
+      // Find the post first to get author and community info
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res.status(404).json({
+          success: false,
+          message: "Post not found"
+        });
+      }
+  
+      // Delete the post
+      await Post.findByIdAndDelete(postId);
+  
+      // Remove post reference from author's posts array
+      if (post.author) {
+        await User.findByIdAndUpdate(
+          post.author,
+          { $pull: { posts: postId } },
+          { new: true }
+        );
+      }
+  
+      // Remove post reference from community if it exists
+      if (post.community) {
+        await Community.findByIdAndUpdate(
+          post.community,
+          { $pull: { posts: postId } },
+          { new: true }
+        );
+      }
+  
+      // Delete banner image from cloudinary if exists
+      if (post.banner) {
+        try {
+          const publicId = post.banner.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudinaryError) {
+          console.log("Error deleting image from cloudinary:", cloudinaryError);
         }
-        
-        return res.status(200).json({
-            success : true,
-            message : "Post deleted successfully",
-            data : postDeleted
-        })
+      }
+  
+      return res.status(200).json({
+        success: true,
+        message: "Post deleted successfully"
+      });
+    } catch (error) {
+      console.error("Delete post error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error.message
+      });
     }
-    catch(error)
-    {
-        console.log(error.message);
-        return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
-    }
-}
+  };
 
 exports.updatePostTitle = async (req,res) =>{
     try 
@@ -326,3 +348,89 @@ exports.getPostBasedOnTags = async (req,res) => {
         })
     }
 }
+
+exports.getCommunityPosts = async (req, res) => {
+    try {
+        const communityId = req.params.communityId;
+        console.log('Fetching posts for community:', communityId);
+        
+        if (!communityId) {
+            return res.status(400).json({
+                success: false,
+                message: "Community ID is required"
+            });
+        }
+
+        // Validate if ID is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(communityId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid community ID format"
+            });
+        }
+
+        const posts = await Post.find({ community: communityId })
+            .populate('author', 'firstName lastName')
+            .populate('community', 'name')
+            .sort({ createdAt: -1 })
+            .exec();
+
+        console.log('Found posts:', posts.length);
+
+        return res.status(200).json({
+            success: true,
+            message: "Community posts fetched successfully",
+            data: posts
+        });
+    } catch (error) {
+        console.error('Error in getCommunityPosts:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+exports.publishDraft = async (req, res) => {
+    try {
+        const { postId } = req.body;
+        const userId = req.body.id;
+
+        // Find the post and verify ownership
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found"
+            });
+        }
+
+        if (post.author.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized to publish this draft"
+            });
+        }
+
+        // Update the post to published status
+        const updatedPost = await Post.findByIdAndUpdate(
+            postId,
+            { isDraft: false },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Draft published successfully",
+            data: updatedPost
+        });
+    } catch (error) {
+        console.error("Error publishing draft:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+

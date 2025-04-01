@@ -1,26 +1,40 @@
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <AppBar 
       position="static" 
       elevation={0}
       sx={{ 
-        background: 'linear-gradient(90deg, #e2e2e2, #c9d6ff)',
-        padding: "1rem 0",
+        background: 'linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)',
+        padding: "0.8rem 0",
+        borderBottom: '1px solid rgba(77, 97, 252, 0.1)',
       }}
     >
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        {/* Logo */}
         <Box
           display="flex"
           alignItems="center"
           component={motion.div}
-          initial={{ opacity: 0, x: -50 }}
+          initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           onClick={() => navigate("/")}
@@ -29,38 +43,30 @@ const Navbar = () => {
           <Typography 
             variant="h4" 
             sx={{ 
-              fontFamily: "'Abril Fatface', cursive",
-              color: '#1976D2',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-              letterSpacing: '1px'
+              fontWeight: "800",
+              color: "#2D31FA",
+              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              letterSpacing: "0.02em",
             }}
           >
             BlogNest
           </Typography>
         </Box>
 
-        <Box sx={{ 
-          display: { xs: "none", md: "flex" }, 
-          gap: 4,
-          alignItems: 'center'
-        }}>
-          {[
-            { name: "Home", path: "/" },
-            { name: "About Us", path: "/about" },
-            { name: "Contact Us", path: "/contact" },
-          ].map((item, index) => (
+        {/* Navigation Links - Centered on Desktop */}
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 4, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+          {[{ name: "Home", path: "/" }, { name: "About us", path: "/about" }, { name: "Contact Us", path: "/contact" }].map((item, index) => (
             <Typography
               key={index}
               component={motion.p}
-              whileHover={{ scale: 1.1, y: -2 }}
+              whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300 }}
               onClick={() => navigate(item.path)}
               sx={{
                 cursor: "pointer",
-                color: '#1976D2',
+                color: '#333',
                 fontSize: "1rem",
-                fontFamily: "'Poppins', sans-serif",
                 fontWeight: "500",
                 position: 'relative',
                 '&::after': {
@@ -70,7 +76,7 @@ const Navbar = () => {
                   height: '2px',
                   bottom: -2,
                   left: 0,
-                  backgroundColor: '#1976D2',
+                  backgroundColor: '#2D31FA',
                   transition: 'width 0.3s ease'
                 },
                 '&:hover::after': {
@@ -83,62 +89,56 @@ const Navbar = () => {
           ))}
         </Box>
 
-        <Box sx={{ display: "flex", gap: 2 }}>
-          {!token && (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                variant="contained" 
-                onClick={() => navigate("/auth")}
-                sx={{
-                  background: 'linear-gradient(45deg, #1976D2, #2196F3)',
-                  borderRadius: '50px',
-                  padding: '8px 24px',
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: 500,
-                  boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #1565C0, #1976D2)',
-                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
-                  }
-                }}
-              >
-                Sign In
-              </Button>
-            </motion.div>
-          )}
+        {/* Hamburger Menu for Mobile/Tablet */}
+        <Box sx={{ display: { xs: "flex", md: "none" } }}>
+          <IconButton onClick={handleMenuOpen}>
+            <MenuIcon sx={{ color: "#2D31FA" }} />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
+                background: 'linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)',
+                boxShadow: '0px 4px 20px rgba(45, 49, 250, 0.1)',
+              }
+            }}
+          >
+            {[{ name: "Home", path: "/" }, { name: "About us", path: "/about" }, { name: "Contact", path: "/contact" }].map((item, index) => (
+              <MenuItem key={index} onClick={() => { navigate(item.path); handleMenuClose(); }}>
+                {item.name}
+              </MenuItem>
+            ))}
+            <MenuItem onClick={() => { navigate(token ? "/profile" : "/auth"); handleMenuClose(); }}>
+              {token ? "Profile" : "Sign In"}
+            </MenuItem>
+          </Menu>
+        </Box>
 
-          {token && (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {/* Sign In / Profile Button - Right Aligned on Desktop */}
+        <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="contained" 
+              onClick={() => navigate(token ? "/profile" : "/auth")}
+              sx={{
+                background: '#2D31FA',
+                borderRadius: '50px',
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: 500,
+                boxShadow: '0 4px 15px rgba(45, 49, 250, 0.2)',
+                '&:hover': {
+                  background: '#2024c9',
+                  boxShadow: '0 6px 20px rgba(45, 49, 250, 0.3)',
+                }
+              }}
             >
-              <Button 
-                variant="contained"
-                onClick={() => navigate("/profile")}
-                sx={{
-                  background: 'linear-gradient(45deg, #1976D2, #2196F3)',
-                  borderRadius: '50px',
-                  padding: '8px 24px',
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: 500,
-                  boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #1565C0, #1976D2)',
-                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
-                  }
-                }}
-              >
-                Profile
-              </Button>
-            </motion.div>
-          )}
+              {token ? "Profile" : "Get Started"}
+            </Button>
+          </motion.div>
         </Box>
       </Toolbar>
     </AppBar>

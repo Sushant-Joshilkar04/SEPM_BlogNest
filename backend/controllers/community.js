@@ -1,33 +1,46 @@
 const User = require('../model/user')
 const Post = require('../model/post')
 const Community = require('../model/community');
+const mongoose = require('mongoose');
 
 
 exports.createcommunity = async (req,res) =>{
     try 
     {
-        const admin = req.body.id;
-        const {name,description,category,tags} = req.body;
+        const { name, description, banner, category, creator } = req.body;
 
-        const communityCreated = await Community.create({name : name,description : description,admin : admin,category : category,tags: tags});
-        const userUpdated = await User.findByIdAndUpdate( { _id : admin },{
-            $push : {
-                community : communityCreated._id
+        const communityCreated = await Community.create({
+            name,
+            description,
+            banner,
+            category,
+            admin: creator,
+            members: [creator]
+        });
+
+        const userUpdated = await User.findByIdAndUpdate(
+            creator,
+            {
+                $push: {
+                    community: communityCreated._id
+                }
             },
-            adminOf : communityCreated._id
-        })
+            { new: true }
+        );
 
         return res.status(200).json({
-            success : true,
-            message : "community created successfully"
-        })
+            success: true,
+            message: "Community created successfully",
+            data: communityCreated
+        });
     }
     catch(error)
     {
+        console.error("Error creating community:", error);
         return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
+            success: false,
+            message: error.message || "Internal Server Error"
+        });
     }
 }
 
@@ -56,22 +69,44 @@ exports.getCommunityById = async (req,res) => {
     try 
     {
         const id = req.params.id;
+        
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Community ID is required"
+            });
+        }
 
-        const community = await Community.find({_id : id}).populate('posts').populate('admin').exec();
+        // Validate if ID is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid community ID format"
+            });
+        }
+
+        const community = await Community.findById(id).populate('posts').populate('admin').exec();
+        
+        if (!community) {
+            return res.status(404).json({
+                success: false,
+                message: "Community not found"
+            });
+        }
 
         return res.status(200).json({
-            success : true,
-            message : "Community fetched successfully",
-            data : community
-        })
+            success: true,
+            message: "Community fetched successfully",
+            data: [community]
+        });
     }
     catch(error)
     {
         console.log(error.message);
         return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
+            success: false,
+            message: "Internal Server Error"
+        });
     }    
 }
 
@@ -277,3 +312,21 @@ exports.leaveCommunity = async (req,res) => {
         })
     }  
 }
+
+exports.getUserCommunities = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const communities = await Community.find({ members: userId });
+        
+        res.status(200).json({
+            success: true,
+            data: communities
+        });
+    } catch (error) {
+        console.error('Error getting user communities:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching user communities'
+        });
+    }
+};

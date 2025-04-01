@@ -1,4 +1,4 @@
-import { Box, Typography, Container, Grid } from "@mui/material";
+import { Box, Typography, Container, Grid, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
 
@@ -7,15 +7,32 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        background: 'linear-gradient(90deg, #e2e2e2, #c9d6ff)',
-        color: '#1976D2',
-        py: 3,
+        background: 'linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)',
+        color: '#2D31FA',
+        py: 5,
         width: "100%",
-        borderTop: '1px solid rgba(25, 118, 210, 0.1)',
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.05)',
+        borderTop: '1px solid rgba(45, 49, 250, 0.1)',
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <Container maxWidth="lg">
+      {/* Wave Background */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "30%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.05) 0%, rgba(77, 97, 252, 0.1) 100%)",
+          borderTopLeftRadius: "50% 80%",
+          borderTopRightRadius: "50% 80%",
+          transform: "scale(1.5)",
+          zIndex: 1,
+        }}
+      />
+      
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           <Grid item xs={12}>
             <motion.div
@@ -24,17 +41,14 @@ const Footer = () => {
               transition={{ duration: 0.8 }}
             >
               <Typography 
-                variant="h6" 
+                variant="h4" 
                 align="center"
                 sx={{
-                  fontFamily: "'Abril Fatface', cursive",
-                  fontSize: "1.5rem",
+                  fontWeight: "800",
+                  color: "#2D31FA",
+                  fontSize: "2rem",
                   mb: 1,
-                  background: 'linear-gradient(45deg, #1976D2, #2196F3)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.05)'
+                  letterSpacing: "0.02em",
                 }}
               >
                 BlogNest
@@ -50,23 +64,21 @@ const Footer = () => {
                 variant="body1" 
                 align="center"
                 sx={{ 
-                  fontFamily: "'Poppins', sans-serif",
-                  fontSize: "0.9rem",
-                  color: '#666',
+                  fontSize: "1rem",
+                  color: '#555',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '4px'
+                  gap: '4px',
+                  mb: 1,
                 }}
               >
-                Made with <FaHeart style={{ color: '#e91e63' }} /> by Team BlogNest
               </Typography>
               <Typography 
                 variant="body2" 
                 align="center"
                 sx={{ 
-                  fontFamily: "'Poppins', sans-serif",
-                  fontSize: "0.8rem",
+                  fontSize: "0.9rem",
                   color: '#666',
                   mt: 1
                 }}

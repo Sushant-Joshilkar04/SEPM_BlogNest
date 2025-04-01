@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FiMail, FiLock, FiUser } from 'react-icons/fi';
 import { FaGoogle, FaFacebook, FaGithub, FaLinkedin } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
+import { motion } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 
 const AuthPage = () => {
@@ -12,17 +13,14 @@ const AuthPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   
-  
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
- 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [userRole, setUserRole] = useState('user');
-
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -153,7 +151,6 @@ const AuthPage = () => {
     return true;
   };
 
-
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (validateLoginForm()) {
@@ -169,22 +166,47 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 " style={{ background: 'linear-gradient(90deg, #e2e2e2, #c9d6ff)' }}>
+    <div className="flex justify-center items-center min-h-screen p-4 relative overflow-hidden" 
+      style={{ background: 'linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)' }}>
+      
+      {/* Wave Background */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/2 z-0"
+        style={{ 
+          background: 'linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.4) 100%)',
+          borderTopLeftRadius: '50% 40%',
+          borderTopRightRadius: '50% 40%',
+          transform: 'scale(1.5)'
+        }}>
+      </div>
+      
       {isMobile && (
-        <div className="fixed top-4 left-0 right-0 flex justify-center z-50">
-          <div className="bg-white px-4 py-2 rounded-full shadow-md">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="fixed top-24 left-0 right-0 flex justify-center z-50"
+        >
+          <div className="bg-white px-4 py-2 rounded-full shadow-md border border-[rgba(77,97,252,0.1)]">
             <button
               onClick={() => setIsRegisterActive(!isRegisterActive)}
-              className="text-blue-500 font-medium"
+              className="text-[#2D31FA] font-medium"
             >
               {isRegisterActive ? 'Switch to Login' : 'Switch to Register'}
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
       
-      <div className="relative w-full max-w-5xl h-[550px] bg-white rounded-3xl shadow-xl overflow-hidden">
-
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-full max-w-5xl h-[550px] bg-white rounded-3xl shadow-xl overflow-hidden z-10"
+        style={{ 
+          boxShadow: '0px 10px 30px rgba(45, 49, 250, 0.1)',
+          border: '1px solid rgba(77, 97, 252, 0.1)'
+        }}
+      >
         <div 
           className={`absolute inset-0 flex transition-transform duration-700 ease-in-out ${
             isRegisterActive ? 'translate-x-[-50%]' : 'translate-x-0'
@@ -194,44 +216,81 @@ const AuthPage = () => {
           {/* Login Panel */}
           <div className="flex min-w-[50%] h-full">
             {/* Left Blue Panel - Login State */}
-            <div className="w-1/2 bg-blue-400 flex flex-col justify-center items-center text-white p-8">
-                <h1 className="text-4xl font-bold mb-2">Hello, Welcome!</h1>
-                <p className="mb-6 text-center">Don't have an account?</p>
-                <button 
-                    onClick={() => setIsRegisterActive(true)}
-                    className="px-10 py-2 border-2 border-white rounded-lg hover:bg-white/10 transition-colors font-semibold"
-                >
-                    Register
-                </button>
+            <div className="w-1/2 flex flex-col justify-center items-center text-white p-8"
+              style={{ background: 'linear-gradient(135deg, #2D31FA, #5D61FF)' }}
+            >
+              <motion.h1 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="text-4xl font-bold mb-2"
+              >
+                Hello, Welcome!
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mb-6 text-center"
+              >
+                Don't have an account?
+              </motion.p>
+              <motion.button 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsRegisterActive(true)}
+                className="px-10 py-2 border-2 border-white rounded-full hover:bg-white/10 transition-colors font-semibold"
+              >
+                Register
+              </motion.button>
             </div>
 
             <div className="w-1/2 flex flex-col justify-center items-center p-8">
-                <div className="w-full max-w-md"></div>
               <div className="w-full max-w-md">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">Login</h1>
+                <motion.h1 
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="text-3xl font-bold text-[#2D31FA] mb-6"
+                >
+                  Login
+                </motion.h1>
                 
                 {error && !isRegisterActive && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 border border-red-100"
+                  >
                     {error}
-                  </div>
+                  </motion.div>
                 )}
                 
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <motion.form 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  onSubmit={handleLoginSubmit} 
+                  className="space-y-4"
+                >
                   <div className="relative">
                     <input 
                       type="email" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
-                      placeholder="Username"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
+                      placeholder="Email"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
                     />
-                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
 
                   <div className="relative">
                     <select
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none appearance-none cursor-pointer"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors appearance-none cursor-pointer"
                       value={userRole}
                       onChange={(e) => setUserRole(e.target.value)}
                       required
@@ -239,56 +298,41 @@ const AuthPage = () => {
                       <option value="user">User</option>
                       <option value="admin">Admin</option>
                     </select>
-                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#2D31FA]">
                       <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" />
                       </svg>
                     </div>
                   </div>
                   
-                    <div className="relative">
+                  <div className="relative">
                     <input 
                       type="password" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
                       placeholder="Password"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
                     />
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
                   
                   <div className="text-right">
-                    <a href="#" className="text-sm text-gray-600 hover:text-blue-500">Forgot Password?</a>
+                    <a href="#" className="text-sm text-[#2D31FA] hover:underline">Forgot Password?</a>
                   </div>
                   
-                  <button 
+                  <motion.button 
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-colors"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full bg-[#2D31FA] hover:bg-[#2024c9] text-white py-3 rounded-full font-semibold transition-colors"
+                    style={{ boxShadow: '0 4px 10px rgba(45, 49, 250, 0.3)' }}
                   >
                     {loading ? 'Logging in...' : 'Login'}
-                  </button>
-                </form>
-                
-                {/* <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600 mb-3">or login with social platforms</p>
-                  <div className="flex justify-center space-x-4">
-                    <a href="#" className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      <FaGoogle className="text-xl text-red-500" />
-                    </a>
-                    <a href="#" className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      <FaFacebook className="text-xl text-blue-600" />
-                    </a>
-                    <a href="#" className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      <FaGithub className="text-xl" />
-                    </a>
-                    <a href="#" className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      <FaLinkedin className="text-xl text-blue-700" />
-                    </a>
-                  </div>
-                </div> */}
+                  </motion.button>
+                </motion.form>
               </div>
             </div>
           </div>
@@ -298,88 +342,128 @@ const AuthPage = () => {
             {/* Register Form */}
             <div className="w-1/2 flex flex-col justify-center items-center p-8">
               <div className="w-full max-w-md">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">Registration</h1>
+                <motion.h1 
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="text-3xl font-bold text-[#2D31FA] mb-6"
+                >
+                  Registration
+                </motion.h1>
                 
                 {error && isRegisterActive && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 border border-red-100"
+                  >
                     {error}
-                  </div>
+                  </motion.div>
                 )}
                 
-                <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <motion.form 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  onSubmit={handleRegisterSubmit} 
+                  className="space-y-4"
+                >
                   <div className="relative">
                     <input 
                       type="text" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
                       placeholder="Username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
                     />
-                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
                   
                   <div className="relative">
                     <input 
                       type="email" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
                       placeholder="Email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
-                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
                   
                   <div className="relative">
                     <input 
                       type="password" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
                   
                   <div className="relative">
                     <input 
                       type="password" 
-                      className="w-full bg-gray-100 rounded-lg py-3 px-4 pl-12 outline-none"
+                      className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
                       placeholder="Confirm Password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D31FA]" />
                   </div>
                   
-                  
-                  <button 
+                  <motion.button 
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-colors"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full bg-[#2D31FA] hover:bg-[#2024c9] text-white py-3 rounded-full font-semibold transition-colors"
+                    style={{ boxShadow: '0 4px 10px rgba(45, 49, 250, 0.3)' }}
                   >
                     {loading ? 'Registering...' : 'Register'}
-                  </button>
-                </form>
+                  </motion.button>
+                </motion.form>
               </div>
             </div>
             {/* Right Blue Panel - Register State */}
-            <div className="w-1/2 bg-blue-400 flex flex-col justify-center items-center text-white p-8">
-              <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>
-              <p className="mb-6 text-center">Already have an account?</p>
-              <button 
+            <div className="w-1/2 flex flex-col justify-center items-center text-white p-8"
+              style={{ background: 'linear-gradient(135deg, #2D31FA, #5D61FF)' }}
+            >
+              <motion.h1 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="text-4xl font-bold mb-2"
+              >
+                Welcome Back!
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mb-6 text-center"
+              >
+                Already have an account?
+              </motion.p>
+              <motion.button 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setIsRegisterActive(false)}
-                className="px-10 py-2 border-2 border-white rounded-lg hover:bg-white/10 transition-colors font-semibold"
+                className="px-10 py-2 border-2 border-white rounded-full hover:bg-white/10 transition-colors font-semibold"
               >
                 Login
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
       <ToastContainer 
         position="top-right"
         autoClose={3000}

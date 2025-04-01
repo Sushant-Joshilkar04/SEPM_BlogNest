@@ -15,7 +15,8 @@ const schema = new mongoose.Schema({
     content : String,
     isValid : { type : Boolean , default : true },
     reportCount : {type : Number, default : 1},
-    banner : String
+    banner : String,
+    isDraft: { type: Boolean, default: false }
 })
 
 module.exports = mongoose.model('Post',schema);

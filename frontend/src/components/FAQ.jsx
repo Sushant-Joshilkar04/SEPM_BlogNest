@@ -71,88 +71,133 @@ const FAQ = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={containerVariants}
+    <Box
+      sx={{
+        background: 'linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)',
+        py: 10,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Wave Background */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "40%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
+          borderBottomLeftRadius: "50% 20%",
+          borderBottomRightRadius: "50% 20%",
+          transform: "scale(1.5)",
+          zIndex: 1,
+        }}
+      />
+    
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          position: 'relative',
+          zIndex: 2 
+        }}
       >
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography
-            component={motion.h2}
-            variants={itemVariants}
-            variant="h2"
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.main',
-              mb: 2
-            }}
-          >
-            Frequently Asked Questions
-          </Typography>
-          <Typography
-            component={motion.p}
-            variants={itemVariants}
-            variant="h6"
-            color="text.secondary"
-            sx={{ maxWidth: '800px', mx: 'auto' }}
-          >
-            Find answers to common questions about BlogNest
-          </Typography>
-        </Box>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          {/* Header */}
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              component={motion.h2}
+              variants={itemVariants}
+              variant="h2"
+              sx={{
+                fontWeight: 800,
+                color: '#2D31FA',
+                mb: 2,
+                fontSize: { xs: '2.5rem', md: '3rem' },
+                letterSpacing: '0.02em',
+              }}
+            >
+              Frequently Asked Questions
+            </Typography>
+            <Typography
+              component={motion.p}
+              variants={itemVariants}
+              variant="h6"
+              sx={{ 
+                maxWidth: '800px', 
+                mx: 'auto',
+                color: '#555',
+                fontSize: '1.1rem',
+                mb: 2,
+              }}
+            >
+              Find answers to common questions about BlogNest
+            </Typography>
+          </Box>
 
-        {/* FAQ Accordions */}
-        <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-          {faqs.map((faq, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <Accordion
-                sx={{
-                  mb: 2,
-                  borderRadius: '8px !important',
-                  boxShadow: theme.shadows[2],
-                  '&:before': { display: 'none' },
-                  '&.Mui-expanded': {
-                    boxShadow: theme.shadows[4],
-                  }
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={
-                    <ExpandMoreIcon sx={{ color: 'primary.main' }} />
-                  }
+          {/* FAQ Accordions */}
+          <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
+            {faqs.map((faq, index) => (
+              <motion.div key={index} variants={itemVariants}>
+                <Accordion
                   sx={{
-                    '& .MuiAccordionSummary-content': {
-                      my: 2
+                    mb: 2,
+                    borderRadius: '8px !important',
+                    overflow: 'hidden',
+                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.05)',
+                    border: '1px solid rgba(77, 97, 252, 0.1)',
+                    '&:before': { display: 'none' },
+                    '&.Mui-expanded': {
+                      boxShadow: '0px 6px 20px rgba(45, 49, 250, 0.1)',
                     }
                   }}
                 >
-                  <Typography
-                    variant="h6"
+                  <AccordionSummary
+                    expandIcon={
+                      <ExpandMoreIcon sx={{ color: '#2D31FA' }} />
+                    }
                     sx={{
-                      fontWeight: 500,
-                      color: 'text.primary'
+                      background: 'rgba(77, 97, 252, 0.02)',
+                      '& .MuiAccordionSummary-content': {
+                        my: 1.5
+                      }
                     }}
                   >
-                    {faq.question}
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ pb: 3 }}>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ lineHeight: 1.7 }}
-                  >
-                    {faq.answer}
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
-            </motion.div>
-          ))}
-        </Box>
-      </motion.div>
-    </Container>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: '#333',
+                        fontSize: '1.1rem',
+                      }}
+                    >
+                      {faq.question}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ p: 3 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ 
+                        color: '#555',
+                        lineHeight: 1.7,
+                        fontSize: '1rem', 
+                      }}
+                    >
+                      {faq.answer}
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+              </motion.div>
+            ))}
+          </Box>
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 

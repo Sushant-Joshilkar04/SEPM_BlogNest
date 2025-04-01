@@ -1,203 +1,354 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Typography, 
-  Button, 
-  TextField, 
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  IconButton,
-  Alert
-} from '@mui/material';
 import { motion } from 'framer-motion';
-import { Edit, Delete, ArrowBack } from '@mui/icons-material';
-import Sidebar from '../components/Sidebar';
+import { UserDock } from '../components/Dock';
 import axios from 'axios';
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Card, 
+  CardMedia, 
+  CardContent, 
+  CircularProgress,
+  Avatar,
+  Divider
+} from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 const UserBlog = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState(null);
+  const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [editMode, setEditMode] = useState(false);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedContent, setEditedContent] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState(false);
 
   useEffect(() => {
-    fetchPost();
+    fetchUserData();
+    fetchUserPosts();
   }, [id]);
 
-  const fetchPost = async () => {
+  const fetchUserData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/posts/getpost/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/auth/getuser/${id}`);
       if (response.data.success) {
-        const postData = response.data.data[0];
-        setPost(postData);
-        setEditedTitle(postData.title);
-        setEditedContent(postData.content);
+        setUser(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching post:', error);
-      setError('Failed to fetch post');
+      console.error('Error fetching user data:', error);
+      setError('Failed to fetch user data');
+    }
+  };
+
+  const fetchUserPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/posts/getallpost');
+      if (response.data.success) {
+        const userPosts = response.data.data.filter(post => 
+          post.author && post.author._id === id
+        );
+        setPosts(userPosts);
+      }
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      setError('Failed to fetch user posts');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdate = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Update title
-      await axios.put('http://localhost:5000/api/posts/updateposttitle', 
-        { postId: id, title: editedTitle },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // Update content
-      await axios.put('http://localhost:5000/api/posts/updatepostcontent',
-        { postId: id, content: editedContent },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setEditMode(false);
-      fetchPost();
-    } catch (error) {
-      console.error('Error updating post:', error);
-      setError('Failed to update post');
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete('http://localhost:5000/api/posts/deletepost', {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { postId: id }
-      });
-      navigate('/profile');
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      setError('Failed to delete post');
-    }
+  const handlePostClick = (postId) => {
+    navigate(`/blog/${postId}`);
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </div>
+      <Box 
+        sx={{ 
+          minHeight: "100vh", 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)"
+        }}
+      >
+        <CircularProgress sx={{ color: "#2D31FA" }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box 
+        sx={{ 
+          minHeight: "100vh", 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)"
+        }}
+      >
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 p-4 md:ml-64 transition-all duration-300">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+        background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
+        pb: 10,
+        pt: 2,
+      }}
+    >
+      {/* Wave Background - Top */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "30%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
+          borderBottomLeftRadius: "50% 20%",
+          borderBottomRightRadius: "50% 20%",
+          transform: "scale(1.5)",
+          zIndex: 0,
+        }}
+      />
+
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card 
+              elevation={0}
+              sx={{ 
+                mb: 6, 
+                borderRadius: 3,
+                p: 3,
+                background: "white",
+                boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                border: "1px solid rgba(77, 97, 252, 0.08)"
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 2 }}>
+                <Avatar
+                  src={user.avatar || 'https://via.placeholder.com/100'}
+                  alt={user.firstName}
+                  sx={{ 
+                    width: 100, 
+                    height: 100,
+                    border: "4px solid rgba(77, 97, 252, 0.1)"
+                  }}
+                />
+                <Box>
+                  <Typography 
+                    variant="h4" 
+                    fontWeight={700}
+                    color="#333"
+                    sx={{ mb: 0.5 }}
+                  >
+                    {user.firstName} {user.lastName}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                    {user.email}
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Divider sx={{ my: 2, borderColor: "rgba(0, 0, 0, 0.06)" }} />
+              
+              <Box sx={{ display: "flex", gap: 4, mt: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: "#2D31FA"
+                    }}
+                  >
+                    {posts.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    posts
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: "#2D31FA"
+                    }}
+                  >
+                    {user.followers?.length || 0}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    followers
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: "#2D31FA"
+                    }}
+                  >
+                    {user.following?.length || 0}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    following
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-7xl mx-auto"
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <IconButton onClick={() => navigate('/profile')}>
-              <ArrowBack />
-            </IconButton>
-            <div>
-              <IconButton color="primary" onClick={() => setEditMode(!editMode)}>
-                <Edit />
-              </IconButton>
-              <IconButton color="error" onClick={() => setDeleteDialog(true)}>
-                <Delete />
-              </IconButton>
-            </div>
-          </div>
-
-          {error && (
-            <Alert severity="error" className="mb-4">
-              {error}
-            </Alert>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column - Image */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="w-full h-[400px] rounded-lg overflow-hidden"
-            >
-              <img
-                src={post?.banner}
-                alt={post?.title}
-                className="w-full h-full object-cover"
-              />
+          <Typography
+            variant="h4"
+            fontWeight="700"
+            color="#2D31FA"
+            sx={{
+              mb: 4,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Posts
+          </Typography>
             </motion.div>
 
-            {/* Right Column - Content */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
+            gap: 4,
+          }}
+        >
+          {posts.map((post, index) => (
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex flex-col"
+              key={post._id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.6 }}
+              whileHover={{ scale: 1.03, y: -5 }}
+              onClick={() => handlePostClick(post._id)}
+              style={{ cursor: "pointer" }}
             >
-              {editMode ? (
-                <>
-                  <TextField
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    label="Title"
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
-                    label="Content"
-                    multiline
-                    rows={8}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="contained" onClick={handleUpdate}>
-                      Save Changes
-                    </Button>
-                    <Button onClick={() => setEditMode(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Typography variant="h4" gutterBottom>
-                    {post?.title}
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "box-shadow 0.3s ease",
+                  "&:hover": {
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="160"
+                  image={post.banner || 'https://via.placeholder.com/400x200'}
+                  alt={post.title}
+                  sx={{ objectFit: "cover" }}
+                />
+                <CardContent sx={{ p: 3 }}>
+                  <Typography 
+                    variant="h6" 
+                    gutterBottom 
+                    sx={{ 
+                      fontWeight: 600, 
+                      mb: 1,
+                      minHeight: "3rem",
+                      color: "#333"
+                    }}
+                  >
+                    {post.title}
                   </Typography>
-                  <Typography variant="body1" className="mt-4">
-                    {post?.content}
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      mb: 2,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical"
+                    }}
+                  >
+                    {post.content}
                   </Typography>
-                </>
-              )}
+                  
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CalendarTodayIcon sx={{ color: "#2D31FA", fontSize: 16 }} />
+                      <Typography variant="caption" sx={{ color: "#555" }}>
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <FavoriteIcon sx={{ color: "#ff4081", fontSize: 16 }} />
+                      <Typography variant="caption" sx={{ color: "#555" }}>
+                        {post.likes || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
             </motion.div>
-          </div>
+          ))}
+        </Box>
+        
+        {posts.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 8 }}>
+            <Typography variant="h6" color="text.secondary">
+              No posts found.
+            </Typography>
+          </Box>
+        )}
+      </Container>
 
-          {/* Delete Confirmation Dialog */}
-          <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
-            <DialogTitle>Delete Blog Post</DialogTitle>
-            <DialogContent>
-              Are you sure you want to delete this blog post? This action cannot be undone.
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteDialog(false)}>Cancel</Button>
-              <Button onClick={handleDelete} color="error">Delete</Button>
-            </DialogActions>
-          </Dialog>
-        </motion.div>
-      </main>
-    </div>
+      {/* Wave Background - Bottom */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "30%",
+          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
+          borderTopLeftRadius: "50% 30%",
+          borderTopRightRadius: "50% 30%",
+          transform: "scale(1.5)",
+          zIndex: 0,
+        }}
+      />
+
+      <UserDock />
+    </Box>
   );
 };
 

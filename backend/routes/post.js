@@ -1,7 +1,7 @@
 const express = require('express')
 const postRouter = express.Router();
 
-const {createpost,getAllposts,getPostById,deletePost,updatePostTitle,updatePostContent,reportpost,addImpression,addLike,getPostBasedOnTags} = require('../controllers/post') 
+const {createpost,getAllposts,getPostById,deletePost,updatePostTitle,updatePostContent,reportpost,addImpression,addLike,getPostBasedOnTags,getCommunityPosts,publishDraft} = require('../controllers/post') 
 const {auth,isUser,isAdmin} = require('../middleware/auth')
 
 postRouter.post('/createpost',auth,isUser,createpost);
@@ -15,5 +15,7 @@ postRouter.post('/reportpost',auth,isUser,reportpost);
 postRouter.post('/addimpressions',addImpression);
 postRouter.post('/addlike',auth,isUser,addLike);
 postRouter.get('/getsimilarpost',getPostBasedOnTags);
+postRouter.get('/getcommunityposts/:communityId', auth, getCommunityPosts);
+postRouter.put('/publishdraft',auth,isUser,publishDraft);
 
 module.exports = postRouter;

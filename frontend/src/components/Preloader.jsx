@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, LinearProgress, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import penPaperImage from '../assets/pen-paper.svg'; // Make sure to add this image to your assets folder
-import ParticlesBackground from './ParticlesBackground';
+import penPaperImage from '../assets/pen-paper.svg'; 
+
 
 const Preloader = () => {
   const [progress, setProgress] = useState(0);
-  const LOADING_DURATION = 4000; // 4 seconds total
+  const LOADING_DURATION = 4000;
 
   useEffect(() => {
     const startTime = Date.now();
@@ -50,8 +50,7 @@ const Preloader = () => {
         overflow: 'hidden',
       }}
     >
-      
-      <ParticlesBackground />
+  
 
       {/* Animated Pen and Paper */}
       <motion.div
