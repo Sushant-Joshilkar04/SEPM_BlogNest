@@ -83,6 +83,19 @@ const AuthPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     
+    if (!username.includes(' ')) {
+      toast.error('Please enter both first name and last name with a space between them');
+      return;
+    }
+
+    const [firstName, ...lastNameParts] = username.split(' ');
+    const lastName = lastNameParts.join(' ');
+
+    if (!firstName || !lastName) {
+      toast.error('Please enter both first name and last name');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       toast.error('Passwords do not match');
@@ -94,25 +107,47 @@ const AuthPage = () => {
     
     try {
       const response = await axios.post('http://localhost:5000/api/auth/signup', {
-        firstName: username.split(' ')[0],
-        lastName: username.split(' ')[1] || '',
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword
       });
       
-      if (response.data.success) {
-        toast.success('Signup successful! Please login.');
-        setIsRegisterActive(false);
-        
-        setLoginEmail(email);
-        setLoginPassword(password);
-        setError('');
+      // Check if registration was successful
+      if (response.data) {
+        toast.success('Registration successful! Please login with your credentials', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Reset form and switch to login after a short delay
+        setTimeout(() => {
+          setIsRegisterActive(false);
+          setLoginEmail(email);
+          setLoginPassword('');
+          setUsername('');
+          setEmail('');
+          setPassword('');
+          setConfirmPassword('');
+        }, 1000);
       }
     } catch (err) {
       console.error('Register error:', err);
-      setError(err.response?.data?.message || 'Registration failed');
-      toast.error(err.response?.data?.message || 'Registration failed');
+      const errorMessage = err.response?.data?.message || 'Registration failed';
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -372,7 +407,7 @@ const AuthPage = () => {
                     <input 
                       type="text" 
                       className="w-full bg-[rgba(77,97,252,0.05)] rounded-lg py-3 px-4 pl-12 outline-none border border-[rgba(77,97,252,0.1)] focus:border-[#2D31FA] transition-colors"
-                      placeholder="Username"
+                      placeholder="Enter first name and last name (e.g. John Doe)"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required

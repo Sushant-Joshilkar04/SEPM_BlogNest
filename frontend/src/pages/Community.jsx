@@ -20,6 +20,8 @@ import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ArticleIcon from '@mui/icons-material/Article';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Community = () => {
   const navigate = useNavigate();
@@ -47,6 +49,14 @@ const Community = () => {
   };
 
   const handleCreateCommunity = () => {
+    toast.info('Creating new community...', {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
     navigate('/create-community');
   };
 
@@ -109,6 +119,18 @@ const Community = () => {
         pt: 2,
       }}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {/* Wave Background - Top */}
       <Box
         sx={{

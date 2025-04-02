@@ -20,6 +20,8 @@ import {
 } from '@mui/material';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import Uploadfile from '../utils/UploadFile';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreateCommunity = () => {
   const navigate = useNavigate();
@@ -104,18 +106,30 @@ const CreateCommunity = () => {
       );
 
       if (response.data.success) {
-        navigate('/community');
+        toast.success('Community created successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Navigate after toast is shown
+        setTimeout(() => {
+          navigate('/community');
+        }, 2000);
       } else {
         setError(response.data.message || 'Failed to create community');
       }
     } catch (error) {
       console.error('Error creating community:', error);
       if (error.response) {
-        setError(error.response.data.message || 'Failed to create community');
+        toast.error(error.response.data.message || 'Failed to create community');
       } else if (error.request) {
-        setError('No response from server. Please try again.');
+        toast.error('No response from server. Please try again.');
       } else {
-        setError('Error creating community. Please try again.');
+        toast.error('Error creating community. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -464,6 +478,19 @@ const CreateCommunity = () => {
           transform: "scale(1.5)",
           zIndex: 0,
         }}
+      />
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
 
       <UserDock />
