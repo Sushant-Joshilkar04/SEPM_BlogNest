@@ -14,8 +14,10 @@ const schema = new mongoose.Schema({
     impressions : { type : Number , default : 0},
     content : String,
     isValid : { type : Boolean , default : true },
-    reportCount : {type : Number, default : 1},
-    banner : String
+    reportCount : {type : Number, default : 0},
+    banner : String,
+    isDraft: { type: Boolean, default: false },
+    reported_by: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 })
 
 module.exports = mongoose.model('Post',schema);

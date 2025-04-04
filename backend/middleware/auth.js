@@ -26,6 +26,11 @@ exports.auth = async (req, res, next) => {
         
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             
+            req.user = {
+                id: decoded.id,
+                role: decoded.role
+            };
+            
             req.body.id = decoded.id;
             req.body.role = decoded.role;
             
@@ -49,7 +54,7 @@ exports.auth = async (req, res, next) => {
 exports.isUser = (req,res,next) =>{
     try 
     {
-        const role = req.body.role;
+        const role = req.user ? req.user.role : req.body.role;
 
         if(role !== 'user')
         {
@@ -75,7 +80,7 @@ exports.isUser = (req,res,next) =>{
 exports.isAdmin = (req,res,next) =>{
     try 
     {
-        const role = req.body.role;
+        const role = req.user ? req.user.role : req.body.role;
 
         if(role !== 'admin')
         {
