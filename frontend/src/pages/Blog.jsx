@@ -19,7 +19,7 @@ import {
   Divider
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { ThumbUp, Flag, AccessTime, Person } from '@mui/icons-material';
+import { ThumbUp, ThumbUpOffAlt, Flag, FlagOutlined, AccessTime, Person } from '@mui/icons-material';
 import { UserDock } from '../components/Dock';
 import axios from 'axios';
 
@@ -32,14 +32,21 @@ const Blog = () => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [isLiked, setIsLiked] = useState(false);
+  const [isReported, setIsReported] = useState(false);
 
   useEffect(() => {
     fetchPost();
-    checkIfLiked();
   }, [id]);
+
+  useEffect(() => {
+    if (post) {
+      checkUserInteractions();
+    }
+  }, [post]);
 
   const fetchPost = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`http://localhost:5000/api/posts/getpost/${id}`);
       if (response.data.success) {
         setPost(response.data.data[0]); 
@@ -55,10 +62,36 @@ const Blog = () => {
     }
   };
 
-  const checkIfLiked = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.likedPosts) {
-      setIsLiked(user.likedPosts.includes(id));
+  const checkUserInteractions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Check if user has liked the post
+      const likeResponse = await axios.get(
+        `http://localhost:5000/api/posts/checklike/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      if (likeResponse.data.success) {
+        setIsLiked(likeResponse.data.isLiked);
+      }
+
+      // Check if user has reported the post
+      const reportResponse = await axios.get(
+        `http://localhost:5000/api/posts/checkreport/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      if (reportResponse.data.success) {
+        setIsReported(reportResponse.data.isReported);
+      }
+    } catch (error) {
+      console.error('Error checking user interactions:', error);
     }
   };
 
@@ -76,8 +109,9 @@ const Blog = () => {
         return;
       }
 
+      const endpoint = isLiked ? 'removelike' : 'addlike';
       const response = await axios.post(
-        'http://localhost:5000/api/posts/addlike',
+        `http://localhost:5000/api/posts/${endpoint}`,
         { 
           postId: id,
           id: user._id 
@@ -88,22 +122,41 @@ const Blog = () => {
       );
 
       if (response.data.success) {
-        setIsLiked(true);
+        // Toggle the like state
+        setIsLiked(!isLiked);
+        
+        // Update post like count
         setPost(prev => ({
           ...prev,
-          likes: (prev.likes || 0) + 1
+          likes: isLiked ? Math.max((prev.likes || 0) - 1, 0) : (prev.likes || 0) + 1
         }));
+        
         setSnackbar({
           open: true,
-          message: 'Post liked successfully!',
+          message: isLiked ? 'Post unliked successfully!' : 'Post liked successfully!',
           severity: 'success'
         });
       }
     } catch (error) {
-      console.error('Error liking post:', error);
+      console.error('Error toggling like:', error);
+      
+      let errorMessage = 'Failed to update like status';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+
+        errorMessage = error.message || errorMessage;
+      }
+      
       setSnackbar({
         open: true,
-        message: 'Failed to like post',
+        message: errorMessage,
         severity: 'error'
       });
     }
@@ -112,9 +165,8 @@ const Blog = () => {
   const handleReport = async () => {
     try {
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user'));
-
-      if (!token || !user) {
+      
+      if (!token) {
         setSnackbar({
           open: true,
           message: 'Please login to report posts',
@@ -123,8 +175,9 @@ const Blog = () => {
         return;
       }
 
+      const endpoint = isReported ? 'unreportpost' : 'reportpost';
       const response = await axios.post(
-        'http://localhost:5000/api/posts/reportpost',
+        `http://localhost:5000/api/posts/${endpoint}`,
         { postId: id },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -132,18 +185,35 @@ const Blog = () => {
       );
 
       if (response.data.success) {
+        // Toggle the report state
+        setIsReported(!isReported);
         setReportDialogOpen(false);
+        
         setSnackbar({
           open: true,
-          message: 'Post reported successfully',
+          message: isReported ? 'Post unreported successfully' : 'Post reported successfully',
           severity: 'success'
         });
       }
     } catch (error) {
-      console.error('Error reporting post:', error);
+      console.error('Error toggling report:', error);
+      let errorMessage = 'Failed to update report status';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage = error.message || errorMessage;
+      }
+      
       setSnackbar({
         open: true,
-        message: 'Failed to report post',
+        message: errorMessage,
         severity: 'error'
       });
     }
@@ -224,12 +294,14 @@ const Blog = () => {
           {/* Banner Image */}
           <Box 
             component="img"
-            src={post.banner}
+            src={post.banner || "https://via.placeholder.com/1200x600/f0f2ff/2D31FA?text=BlogNest"}
             alt={post.title}
             sx={{
               width: "100%",
               height: { xs: "200px", sm: "300px", md: "400px" },
-              objectFit: "cover",
+              objectFit: "contain",
+              objectPosition: "center",
+              backgroundColor: "#f0f2ff",
             }}
           />
 
@@ -305,7 +377,6 @@ const Blog = () => {
                   <motion.div whileHover={{ scale: 1.1 }}>
                     <IconButton 
                       onClick={handleLike}
-                      disabled={isLiked}
                       sx={{
                         bgcolor: isLiked ? "rgba(45, 49, 250, 0.1)" : "transparent",
                         "&:hover": {
@@ -313,12 +384,11 @@ const Blog = () => {
                         }
                       }}
                     >
-                      <ThumbUp 
-                        sx={{ 
-                          color: isLiked ? "#2D31FA" : "#888",
-                          fontSize: 22
-                        }} 
-                      />
+                      {isLiked ? (
+                        <ThumbUp sx={{ color: "#2D31FA", fontSize: 22 }} />
+                      ) : (
+                        <ThumbUpOffAlt sx={{ color: "#888", fontSize: 22 }} />
+                      )}
                     </IconButton>
                   </motion.div>
                   <Typography variant="body2" fontWeight="500" sx={{ color: "#555" }}>
@@ -331,11 +401,15 @@ const Blog = () => {
                     onClick={() => setReportDialogOpen(true)}
                     sx={{
                       "&:hover": {
-                        bgcolor: "rgba(211, 47, 47, 0.08)"
+                        bgcolor: isReported ? "rgba(211, 47, 47, 0.08)" : "rgba(211, 47, 47, 0.08)"
                       }
                     }}
                   >
-                    <Flag sx={{ color: "#d32f2f", fontSize: 22 }} />
+                    {isReported ? (
+                      <Flag sx={{ color: "#d32f2f", fontSize: 22 }} />
+                    ) : (
+                      <FlagOutlined sx={{ color: "#888", fontSize: 22 }} />
+                    )}
                   </IconButton>
                 </motion.div>
               </Box>
@@ -372,11 +446,13 @@ const Blog = () => {
         }}
       >
         <DialogTitle sx={{ bgcolor: "#f8f9ff", color: "#333", fontWeight: 600 }}>
-          Report Post
+          {isReported ? 'Unreport Post' : 'Report Post'}
         </DialogTitle>
         <DialogContent sx={{ mt: 2 }}>
           <Typography variant="body1">
-            Are you sure you want to report this post? This action cannot be undone.
+            {isReported 
+              ? 'Are you sure you want to remove your report from this post?'
+              : 'Are you sure you want to report this post?'}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -395,13 +471,13 @@ const Blog = () => {
             onClick={handleReport} 
             variant="contained"
             sx={{ 
-              bgcolor: "#d32f2f",
+              bgcolor: isReported ? "#2D31FA" : "#d32f2f",
               "&:hover": {
-                bgcolor: "#b71c1c"
+                bgcolor: isReported ? "#2024c9" : "#b71c1c"
               }
             }}
           >
-            Report
+            {isReported ? 'Unreport' : 'Report'}
           </Button>
         </DialogActions>
       </Dialog>

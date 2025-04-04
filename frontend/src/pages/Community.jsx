@@ -201,9 +201,9 @@ const Community = () => {
           </motion.div>
         </Box>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {filteredCommunities.map((community, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={community._id}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={community._id}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -223,26 +223,33 @@ const Community = () => {
                     border: "1px solid rgba(77, 97, 252, 0.08)",
                     transition: "box-shadow 0.3s ease",
                     cursor: "pointer",
+                    maxWidth: "100%",
                     "&:hover": {
                       boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
                     }
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={community.banner || 'https://via.placeholder.com/400x200'}
-                    alt={community.name}
-                    sx={{ objectFit: "cover" }}
-                  />
-                  <CardContent sx={{ p: 3, flexGrow: 1 }}>
+                  <Box sx={{ position: "relative", height: "120px", overflow: "hidden" }}>
+                    <CardMedia
+                      component="img"
+                      image={community.banner || 'https://via.placeholder.com/400x200'}
+                      alt={community.name}
+                      sx={{ 
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center" 
+                      }}
+                    />
+                  </Box>
+                  <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
                     <Typography 
-                      variant="h5" 
-                      gutterBottom 
+                      variant="h6" 
                       sx={{ 
                         fontWeight: 600,
                         color: "#333",
-                        mb: 1
+                        mb: 1,
+                        fontSize: "1rem",
+                        lineHeight: 1.3
                       }}
                     >
                       {community.name}
@@ -257,7 +264,9 @@ const Community = () => {
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
-                        minHeight: "40px"
+                        fontSize: "0.8rem",
+                        flexGrow: 1,
+                        lineHeight: 1.4
                       }}
                     >
                       {community.description}
@@ -267,18 +276,18 @@ const Community = () => {
                         display: "flex", 
                         justifyContent: "space-between", 
                         mt: 'auto',
-                        pt: 2,
+                        pt: 1,
                         borderTop: "1px solid rgba(45, 49, 250, 0.08)"
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <PeopleAltIcon sx={{ fontSize: 18, color: "#2D31FA" }} />
+                        <PeopleAltIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
                         <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
                           {community.members?.length || 0}
                         </Typography>
                       </Box>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <ArticleIcon sx={{ fontSize: 18, color: "#2D31FA" }} />
+                        <ArticleIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
                         <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
                           {community.posts?.length || 0}
                         </Typography>

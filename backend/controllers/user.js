@@ -132,17 +132,27 @@ exports.getUserById = async (req,res) => {
 exports.getReportedPost = async (req,res) => {
   try 
   {
-      const user = await Post.find({isValid : false});
+      const reportedPosts = await Post.find({ 
+        $or: [
+          { isValid: false },
+          { reportCount: { $gt: 10 } }
+        ]
+      })
+      .populate({
+        path: 'author',
+        select: 'firstName lastName email avatar'
+      })
+      .exec();
   
       return res.status(200).json({
           success : true,
-          message : "Reported s fetched successfully",
-          data : user
+          message : "Reported posts fetched successfully",
+          data : reportedPosts
       })
   }
   catch(error)
   {
-      console.log(error.message);
+      console.log("Error in getReportedPost:", error.message);
       return res.status(500).json({
           success : false,
           message : "Internal Server Error"

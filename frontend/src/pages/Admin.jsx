@@ -62,6 +62,10 @@ const Admin = () => {
     labels: [],
     datasets: []
   });
+  const [communityTrendData, setCommunityTrendData] = useState({
+    labels: [],
+    datasets: []
+  });
   const [reportTypeData, setReportTypeData] = useState({
     labels: [],
     datasets: []
@@ -93,6 +97,10 @@ const Admin = () => {
         // Fetch reported posts
         const reportedResponse = await axios.get('http://localhost:5000/api/auth/getreportedpost', { headers });
         const reportedPosts = reportedResponse.data.data;
+
+        // Fetch all communities
+        const communitiesResponse = await axios.get('http://localhost:5000/api/community/getallcommunities', { headers });
+        const communities = communitiesResponse.data.data;
 
         // Calculate dashboard stats
         const stats = {
@@ -127,6 +135,23 @@ const Admin = () => {
           }]
         };
         setBlogTrendData(blogTrends);
+
+        // Process community post trends (last 7 days)
+        const communityTrends = {
+          labels: last7Days.map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short' })),
+          datasets: [{
+            label: 'Community Posts',
+            data: last7Days.map(date => 
+              posts.filter(post => 
+                post.createdAt.split('T')[0] === date && post.community
+              ).length
+            ),
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            tension: 0.4
+          }]
+        };
+        setCommunityTrendData(communityTrends);
 
         // Get top reported blogs
         const sortedReportedBlogs = [...posts]
@@ -171,6 +196,8 @@ const Admin = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
         position: "relative",
         overflow: "hidden",
         background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
@@ -185,10 +212,10 @@ const Admin = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
-          borderBottomLeftRadius: "50% 20%",
-          borderBottomRightRadius: "50% 20%",
+          borderBottomLeftRadius: "50% 40%",
+          borderBottomRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}
@@ -198,22 +225,24 @@ const Admin = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
         >
           <Typography
-            variant="h3"
-            fontWeight="700"
+            variant="h2"
+            fontWeight="800"
             color="#2D31FA"
             sx={{
-              mb: 5,
+              mb: 4,
               letterSpacing: "0.02em",
+              fontSize: { xs: '2.5rem', md: '3rem' },
+              textTransform: "uppercase"
             }}
           >
             Admin Dashboard
           </Typography>
         </motion.div>
           
-        {/* Stats Grid */}
+          {/* Stats Grid */}
         <Grid container spacing={3} sx={{ mb: 5 }}>
           <Grid item xs={12} sm={6} md={3}>
             <motion.div
@@ -221,7 +250,31 @@ const Admin = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6 }}
             >
-              <StatsCard title="Total Reports" value={dashboardStats.totalReports} icon="🚨" />
+              <Card 
+                elevation={0}
+                sx={{ 
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  height: "100%",
+                  boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Total Reports
+                  </Typography>
+                  <Typography variant="h4" fontWeight="700" color="#333">
+                    {dashboardStats.totalReports}
+                  </Typography>
+                </CardContent>
+              </Card>
             </motion.div>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -230,7 +283,31 @@ const Admin = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
-              <StatsCard title="Blogs Deleted" value={dashboardStats.blogsDeleted} icon="❌" />
+              <Card 
+                elevation={0}
+                sx={{ 
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  height: "100%",
+                  boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Blogs Deleted
+                  </Typography>
+                  <Typography variant="h4" fontWeight="700" color="#333">
+                    {dashboardStats.blogsDeleted}
+                  </Typography>
+                </CardContent>
+              </Card>
             </motion.div>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -239,7 +316,31 @@ const Admin = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <StatsCard title="Total Blogs" value={dashboardStats.totalBlogs} icon="📚" />
+              <Card 
+                elevation={0}
+                sx={{ 
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  height: "100%",
+                  boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Total Blogs
+                  </Typography>
+                  <Typography variant="h4" fontWeight="700" color="#333">
+                    {dashboardStats.totalBlogs}
+                  </Typography>
+                </CardContent>
+              </Card>
             </motion.div>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -248,14 +349,37 @@ const Admin = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              <StatsCard title="Pending Approval" value={dashboardStats.pendingBlogs} icon="⏳" />
+              <Card 
+                elevation={0}
+                sx={{ 
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  height: "100%",
+                  boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Pending Approval
+                  </Typography>
+                  <Typography variant="h4" fontWeight="700" color="#333">
+                    {dashboardStats.pendingBlogs}
+                  </Typography>
+                </CardContent>
+              </Card>
             </motion.div>
           </Grid>
         </Grid>
 
-        {/* Charts Grid */}
+          {/* Charts Grid */}
         <Grid container spacing={4} sx={{ mb: 5 }}>
-          {/* Blog Trends Chart */}
           <Grid item xs={12} lg={6}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -270,7 +394,12 @@ const Admin = () => {
                   background: "white",
                   height: "100%",
                   boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
-                  border: "1px solid rgba(77, 97, 252, 0.08)"
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
@@ -299,8 +428,9 @@ const Admin = () => {
                       scales: {
                         y: {
                           beginAtZero: true,
+                          max: 10,
                           ticks: {
-                            precision: 0
+                            stepSize: 1
                           }
                         }
                       }
@@ -311,7 +441,6 @@ const Admin = () => {
             </motion.div>
           </Grid>
 
-          {/* Report Types Chart */}
           <Grid item xs={12} lg={6}>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -326,7 +455,12 @@ const Admin = () => {
                   background: "white",
                   height: "100%",
                   boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
-                  border: "1px solid rgba(77, 97, 252, 0.08)"
+                  border: "1px solid rgba(77, 97, 252, 0.08)",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                  }
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
@@ -336,39 +470,40 @@ const Admin = () => {
                     color="#333" 
                     sx={{ mb: 3 }}
                   >
-                    Report Types Distribution
+                    Community Post Trends
                   </Typography>
-                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "300px" }}>
-                    {reportTypeData.labels?.length > 0 ? (
-                      <Doughnut 
-                        data={reportTypeData} 
-                        options={{ 
-                          responsive: true,
-                          plugins: {
-                            legend: {
-                              position: 'right',
-                              labels: {
-                                font: {
-                                  family: "'Poppins', sans-serif",
-                                }
-                              }
+                  <Line 
+                    data={communityTrendData} 
+                    options={{ 
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                          labels: {
+                            font: {
+                              family: "'Poppins', sans-serif",
                             }
                           }
-                        }} 
-                      />
-                    ) : (
-                      <Typography variant="body1" color="text.secondary">
-                        No report data available
-                      </Typography>
-                    )}
-                  </Box>
+                        }
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          max: 10,
+                          ticks: {
+                            stepSize: 1
+                          }
+                        }
+                      }
+                    }} 
+                  />
                 </CardContent>
               </Card>
             </motion.div>
           </Grid>
         </Grid>
 
-        {/* Top Reported Blogs */}
+          {/* Top Reported Blogs */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -382,6 +517,11 @@ const Admin = () => {
               background: "white",
               boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
               border: "1px solid rgba(77, 97, 252, 0.08)",
+              transition: "transform 0.3s, box-shadow 0.3s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+              },
               mb: 4
             }}
           >
@@ -467,10 +607,10 @@ const Admin = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
-          borderTopLeftRadius: "50% 30%",
-          borderTopRightRadius: "50% 30%",
+          borderTopLeftRadius: "50% 40%",
+          borderTopRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}
@@ -480,41 +620,5 @@ const Admin = () => {
     </Box>
   );
 };
-
-// Stats Card Component
-const StatsCard = ({ title, value, icon }) => (
-  <Card 
-    elevation={0}
-    sx={{ 
-      borderRadius: 3,
-      overflow: "hidden",
-      background: "white",
-      height: "100%",
-      boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
-      border: "1px solid rgba(77, 97, 252, 0.08)",
-      transition: "transform 0.3s, box-shadow 0.3s",
-      "&:hover": {
-        transform: "translateY(-5px)",
-        boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
-      }
-    }}
-  >
-    <CardContent sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {title}
-          </Typography>
-          <Typography variant="h4" fontWeight="700" color="#333">
-            {value}
-          </Typography>
-        </Box>
-        <Typography variant="h4" sx={{ fontSize: "2.5rem" }}>
-          {icon}
-        </Typography>
-      </Box>
-    </CardContent>
-  </Card>
-);
 
 export default Admin;

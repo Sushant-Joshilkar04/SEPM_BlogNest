@@ -27,33 +27,33 @@ const ReportedBlog = () => {
     fetchReportedPosts();
   }, []);
 
-    const fetchReportedPosts = async () => {
-      try {
-        const token = localStorage.getItem('token');
-  
-        if (!token) {
+  const fetchReportedPosts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
         setError('Unauthorized: No token found');
         setLoading(false);
-          return;
-        }
+        return;
+      }
 
       const response = await axios.get('http://localhost:5000/api/auth/getreportedpost', {
         headers: { Authorization: `Bearer ${token}` }, 
       });
-  
+
       if (response.data.success) {
+        console.log('Reported posts:', response.data.data);
         setReportedPosts(response.data.data);
       } else {
         setError('Failed to fetch reported posts');
       }
-      } catch (error) {
-        console.error('Error fetching reported posts:', error);
+    } catch (error) {
+      console.error('Error fetching reported posts:', error);
       setError('Failed to fetch reported posts');
     } finally {
-        setLoading(false);
-      }
-    };
-
+      setLoading(false);
+    }
+  };
 
   const handleDeletePost = async (postId) => {
     try {
@@ -115,6 +115,8 @@ const ReportedBlog = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
         position: "relative",
         overflow: "hidden",
         background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
@@ -129,10 +131,10 @@ const ReportedBlog = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
-          borderBottomLeftRadius: "50% 20%",
-          borderBottomRightRadius: "50% 20%",
+          borderBottomLeftRadius: "50% 40%",
+          borderBottomRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}
@@ -142,15 +144,17 @@ const ReportedBlog = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
         >
           <Typography
-            variant="h3"
-            fontWeight="700"
+            variant="h2"
+            fontWeight="800"
             color="#2D31FA"
             sx={{
               mb: 5,
               letterSpacing: "0.02em",
+              fontSize: { xs: '2.5rem', md: '3rem' },
+              textTransform: "uppercase"
             }}
           >
             Reported Posts
@@ -162,8 +166,8 @@ const ReportedBlog = () => {
             severity="error" 
             sx={{ 
               mb: 4, 
-              borderRadius: 2,
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
+              borderRadius: 3,
+              boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)"
             }}
             onClose={() => setError('')}
           >
@@ -198,7 +202,7 @@ const ReportedBlog = () => {
             sx={{
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
-              gap: 4,
+              gap: 3,
             }}
           >
             {reportedPosts.map((post, index) => (
@@ -214,129 +218,99 @@ const ReportedBlog = () => {
                     height: "100%",
                     borderRadius: 3,
                     overflow: "hidden",
-                    boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
+                    boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
                     border: "1px solid rgba(77, 97, 252, 0.08)",
-                    transition: "box-shadow 0.3s ease",
+                    transition: "transform 0.3s, box-shadow 0.3s",
                     "&:hover": {
+                      transform: "translateY(-5px)",
                       boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
                     }
                   }}
                 >
                   <CardMedia
                     component="img"
-                    height="160"
+                    height="120"
                     image={post.banner || 'https://via.placeholder.com/400x200'}
                     alt={post.title}
                     sx={{ objectFit: "cover" }}
                   />
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 2 }}>
                     <Typography 
                       variant="h6" 
                       sx={{ 
                         fontWeight: 600, 
-                        mb: 2,
+                        mb: 1,
                         color: "#333",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical"
+                        WebkitBoxOrient: "vertical",
+                        fontSize: "1rem",
+                        lineHeight: 1.4
                       }}
                     >
                       {post.title}
                     </Typography>
+
                     <Typography 
                       variant="body2" 
-                      color="text.secondary" 
                       sx={{ 
+                        fontWeight: 500,
+                        color: "#666",
                         mb: 2,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical"
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        fontSize: "0.8rem"
                       }}
                     >
-                      {post.content}
+                          By {post.author && post.author.firstName ? 
+         `${post.author.firstName} ${post.author.lastName || ''}` : 
+         'Unknown Author'}
                     </Typography>
 
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            fontWeight: 500,
-                            color: "#555" 
-                          }}
-                        >
-                          By {post.author?.firstName} {post.author?.lastName}
-                        </Typography>
-                        <Box 
-                          sx={{ 
-                            display: "flex", 
-                            alignItems: "center", 
-                            gap: 0.5,
-                            bgcolor: "rgba(211, 47, 47, 0.1)",
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 5
-                          }}
-                        >
-                          <ReportIcon sx={{ color: "#d32f2f", fontSize: 14 }} />
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              fontWeight: 600,
-                              color: "#d32f2f" 
-                            }}
-                          >
-                            {post.reports?.length || 0} reports
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Divider sx={{ my: 1, borderColor: "rgba(0, 0, 0, 0.06)" }} />
-
-                      <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-                        <Button
-                          variant="contained"
-                          startIcon={<DeleteIcon />}
-                          onClick={() => handleDeletePost(post._id)}
-                          fullWidth
-                          sx={{
-                            bgcolor: "#d32f2f",
-                            textTransform: "none",
-                            fontWeight: 600,
-                            borderRadius: 2,
-                            py: 1,
-                            "&:hover": {
-                              bgcolor: "#b71c1c"
-                            }
-                          }}
-                        >
-                          Delete
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          startIcon={<CheckCircleIcon />}
-                          onClick={() => handleDismissReport(post._id)}
-                          fullWidth
-                          sx={{
-                            borderColor: "rgba(0, 0, 0, 0.23)",
-                            color: "#555",
-                            textTransform: "none",
-                            fontWeight: 600,
-                            borderRadius: 2,
-                            py: 1,
-                            "&:hover": {
-                              bgcolor: "rgba(0, 0, 0, 0.04)",
-                              borderColor: "rgba(0, 0, 0, 0.23)"
-                            }
-                          }}
-                        >
-                          Dismiss
-                        </Button>
-                      </Box>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        variant="contained"
+                        startIcon={<DeleteIcon sx={{ fontSize: 18 }} />}
+                        onClick={() => handleDeletePost(post._id)}
+                        fullWidth
+                        size="small"
+                        sx={{
+                          bgcolor: "#d32f2f",
+                          textTransform: "none",
+                          fontWeight: 600,
+                          borderRadius: 2,
+                          fontSize: "0.8rem",
+                          "&:hover": {
+                            bgcolor: "#b71c1c"
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<CheckCircleIcon sx={{ fontSize: 18 }} />}
+                        onClick={() => handleDismissReport(post._id)}
+                        fullWidth
+                        size="small"
+                        sx={{
+                          borderColor: "rgba(0, 0, 0, 0.23)",
+                          color: "#555",
+                          textTransform: "none",
+                          fontWeight: 600,
+                          borderRadius: 2,
+                          fontSize: "0.8rem",
+                          "&:hover": {
+                            bgcolor: "rgba(0, 0, 0, 0.04)",
+                            borderColor: "rgba(0, 0, 0, 0.23)"
+                          }
+                        }}
+                      >
+                        Dismiss
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
@@ -353,10 +327,10 @@ const ReportedBlog = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
-          borderTopLeftRadius: "50% 30%",
-          borderTopRightRadius: "50% 30%",
+          borderTopLeftRadius: "50% 40%",
+          borderTopRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}

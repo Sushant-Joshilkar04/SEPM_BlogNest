@@ -105,11 +105,13 @@ const Admin_manageUser = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users
+    .filter(user => user.role !== 'admin')
+    .filter(user => 
+      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   if (loading) {
     return (
@@ -131,6 +133,8 @@ const Admin_manageUser = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
         position: "relative",
         overflow: "hidden",
         background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
@@ -145,10 +149,10 @@ const Admin_manageUser = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
-          borderBottomLeftRadius: "50% 20%",
-          borderBottomRightRadius: "50% 20%",
+          borderBottomLeftRadius: "50% 40%",
+          borderBottomRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}
@@ -159,14 +163,16 @@ const Admin_manageUser = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           >
             <Typography
-              variant="h3"
-              fontWeight="700"
+              variant="h2"
+              fontWeight="800"
               color="#2D31FA"
               sx={{
                 letterSpacing: "0.02em",
+                fontSize: { xs: '2.5rem', md: '3rem' },
+                textTransform: "uppercase"
               }}
             >
               Manage Users
@@ -175,7 +181,7 @@ const Admin_manageUser = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
             <TextField
               placeholder="Search users..."
@@ -190,7 +196,7 @@ const Admin_manageUser = () => {
                   </InputAdornment>
                 ),
                 sx: { 
-                  borderRadius: 2,
+                  borderRadius: 8,
                   bgcolor: "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: "rgba(77, 97, 252, 0.2)"
@@ -203,7 +209,7 @@ const Admin_manageUser = () => {
                   }
                 }
               }}
-              sx={{ width: { xs: '100%', sm: 250 } }}
+              sx={{ width: { xs: '100%', sm: 300 } }}
             />
           </motion.div>
         </Box>
@@ -213,8 +219,8 @@ const Admin_manageUser = () => {
             severity="error" 
             sx={{ 
               mb: 4, 
-              borderRadius: 2,
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
+              borderRadius: 3,
+              boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)"
             }}
             onClose={() => setError('')}
           >
@@ -258,10 +264,11 @@ const Admin_manageUser = () => {
                     sx={{
                       borderRadius: 3,
                       overflow: "hidden",
-                      boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
+                      boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
                       border: "1px solid rgba(77, 97, 252, 0.08)",
-                      transition: "box-shadow 0.3s ease",
+                      transition: "transform 0.3s, box-shadow 0.3s",
                       "&:hover": {
+                        transform: "translateY(-5px)",
                         boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
                       }
                     }}
@@ -394,10 +401,10 @@ const Admin_manageUser = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          height: "30%",
+          height: "40%",
           background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
-          borderTopLeftRadius: "50% 30%",
-          borderTopRightRadius: "50% 30%",
+          borderTopLeftRadius: "50% 40%",
+          borderTopRightRadius: "50% 40%",
           transform: "scale(1.5)",
           zIndex: 0,
         }}

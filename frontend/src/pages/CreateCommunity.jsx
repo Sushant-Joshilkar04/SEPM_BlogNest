@@ -35,7 +35,7 @@ const CreateCommunity = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { 
+      if (file.size > 5 * 1024 * 1024) {
         setError('Image size should be less than 5MB');
         return;
       }
@@ -166,10 +166,10 @@ const CreateCommunity = () => {
             }}
           >
             Create New Community
-          </Typography>
-        </motion.div>
+              </Typography>
+            </motion.div>
 
-        <motion.div
+            <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
@@ -200,197 +200,205 @@ const CreateCommunity = () => {
             )}
 
             <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Banner Image Upload */}
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
-                  Community Banner
-                </Typography>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    minHeight: "200px",
-                    p: 3,
-                    borderRadius: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    border: "2px dashed",
-                    borderColor: preview ? "rgba(77, 97, 252, 0.2)" : "rgba(0, 0, 0, 0.12)",
-                    bgcolor: "white",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      borderColor: preview ? "rgba(77, 97, 252, 0.3)" : "rgba(77, 97, 252, 0.2)"
-                    },
-                    boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)"
-                  }}
-                >
-                  {preview ? (
-                    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
-                      <Box
-                        component="img"
-                        src={preview}
-                        alt="Preview"
-                        sx={{
-                          width: "100%",
-                          height: "150px",
-                          objectFit: "cover",
-                          borderRadius: 2,
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)"
-                        }}
-                      />
-                      <IconButton
-                        onClick={handleRemoveImage}
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          bgcolor: "rgba(255, 255, 255, 0.9)",
-                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                          "&:hover": {
-                            bgcolor: "rgba(255, 255, 255, 1)"
-                          }
-                        }}
-                        size="small"
-                      >
-                        <X size={18} color="#d32f2f" />
-                      </IconButton>
-                    </Box>
-                  ) : (
-                    <Box 
-                      sx={{ 
-                        textAlign: "center", 
-                        cursor: "pointer" 
-                      }} 
-                      onClick={() => document.getElementById('banner-upload').click()}
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
+                {/* Left Column */}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {/* Banner Image Upload */}
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                Community Banner
+              </Typography>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        minHeight: "200px",
+                        p: 3,
+                        borderRadius: 3,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "2px dashed",
+                        borderColor: preview ? "rgba(77, 97, 252, 0.2)" : "rgba(0, 0, 0, 0.12)",
+                        bgcolor: "white",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          borderColor: preview ? "rgba(77, 97, 252, 0.3)" : "rgba(77, 97, 252, 0.2)"
+                        },
+                        boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)"
+                      }}
                     >
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <ImageIcon size={64} className="mx-auto mb-4" style={{ color: "rgba(77, 97, 252, 0.6)" }} />
-                        <Typography variant="h6" color="#333" gutterBottom fontWeight={600}>
-                          Upload Community Banner
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                          Drag and drop or click to select (Max 5MB)
-                        </Typography>
-                      </motion.div>
-                    </Box>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="banner-upload"
-                    style={{ display: "none" }}
-                  />
-                  <label htmlFor="banner-upload">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Button
-                        variant="outlined"
-                        component="span"
-                        startIcon={<Upload size={18} />}
-                        sx={{
-                          mt: 2,
-                          color: "#2D31FA",
-                          borderColor: "rgba(77, 97, 252, 0.5)",
-                          "&:hover": {
-                            borderColor: "#2D31FA",
-                            bgcolor: "rgba(77, 97, 252, 0.04)"
-                          }
-                        }}
-                      >
-                        {preview ? "Change Image" : "Select Image"}
-                      </Button>
-                    </motion.div>
-                  </label>
-                </Paper>
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
-                  Community Name
-                </Typography>
-                <TextField
-                  fullWidth
-                  placeholder="Enter a name for your community"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#2D31FA"
-                      }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#2D31FA"
-                    }
-                  }}
-                />
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
-                  Description
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  placeholder="Describe what your community is about"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#2D31FA"
-                      }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#2D31FA"
-                    }
-                  }}
-                />
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
-                  Category
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    displayEmpty
-                    required
-                    sx={{
-                      borderRadius: 2,
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "rgba(0, 0, 0, 0.23)"
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#2D31FA"
-                      }
-                    }}
+                {preview ? (
+                        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+                          <Box
+                            component="img"
+                      src={preview}
+                      alt="Preview"
+                            sx={{
+                              width: "100%",
+                              height: "150px",
+                              objectFit: "cover",
+                              borderRadius: 2,
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)"
+                            }}
+                    />
+                    <IconButton
+                            onClick={handleRemoveImage}
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              bgcolor: "rgba(255, 255, 255, 0.9)",
+                              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                              "&:hover": {
+                                bgcolor: "rgba(255, 255, 255, 1)"
+                              }
+                            }}
+                            size="small"
+                          >
+                            <X size={18} color="#d32f2f" />
+                    </IconButton>
+                        </Box>
+                      ) : (
+                        <Box 
+                          sx={{ 
+                            textAlign: "center", 
+                            cursor: "pointer" 
+                          }} 
+                    onClick={() => document.getElementById('banner-upload').click()}
                   >
-                    <MenuItem value="" disabled>Select a category</MenuItem>
-                    <MenuItem value="Technology">Technology</MenuItem>
-                    <MenuItem value="Science">Science</MenuItem>
-                    <MenuItem value="Arts">Arts</MenuItem>
-                    <MenuItem value="Sports">Sports</MenuItem>
-                    <MenuItem value="Education">Education</MenuItem>
-                    <MenuItem value="Other">Other</MenuItem>
-                  </Select>
-                </FormControl>
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <ImageIcon size={64} className="mx-auto mb-4" style={{ color: "rgba(77, 97, 252, 0.6)" }} />
+                            <Typography variant="h6" color="#333" gutterBottom fontWeight={600}>
+                              Upload Community Banner
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                              Drag and drop or click to select (Max 5MB)
+                    </Typography>
+                          </motion.div>
+                        </Box>
+                )}
+                <input
+                  type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                  id="banner-upload"
+                        style={{ display: "none" }}
+                      />
+                      <label htmlFor="banner-upload">
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Button
+                            variant="outlined"
+                            component="span"
+                            startIcon={<Upload size={18} />}
+                            sx={{
+                              mt: 2,
+                              color: "#2D31FA",
+                              borderColor: "rgba(77, 97, 252, 0.5)",
+                              "&:hover": {
+                                borderColor: "#2D31FA",
+                                bgcolor: "rgba(77, 97, 252, 0.04)"
+                              }
+                            }}
+                          >
+                            {preview ? "Change Image" : "Select Image"}
+                          </Button>
+                        </motion.div>
+                      </label>
+                    </Paper>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                      Category
+              </Typography>
+                    <FormControl fullWidth>
+                      <Select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        displayEmpty
+                        required
+                        sx={{
+                          borderRadius: 2,
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "rgba(0, 0, 0, 0.23)"
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#2D31FA"
+                          }
+                        }}
+                      >
+                        <MenuItem value="" disabled>Select a category</MenuItem>
+                        <MenuItem value="Technology">Technology</MenuItem>
+                        <MenuItem value="Science">Science</MenuItem>
+                        <MenuItem value="Arts">Arts</MenuItem>
+                        <MenuItem value="Sports">Sports</MenuItem>
+                        <MenuItem value="Education">Education</MenuItem>
+                        <MenuItem value="Other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+
+                {/* Right Column */}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                      Community Name
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      placeholder="Enter a name for your community"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 2,
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#2D31FA"
+                          }
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#2D31FA"
+                        }
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                      Description
+                    </Typography>
+                  <TextField
+                    fullWidth
+                      multiline
+                      rows={9}
+                      placeholder="Describe what your community is about"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      required
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 2,
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#2D31FA"
+                          }
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#2D31FA"
+                        }
+                      }}
+                    />
+                  </Box>
+                </Box>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
@@ -416,11 +424,11 @@ const CreateCommunity = () => {
                   >
                     Cancel
                   </Button>
-                </motion.div>
+            </motion.div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Button
+            <Button
                     type="submit"
-                    variant="contained"
+              variant="contained"
                     disabled={loading || !name.trim() || !description.trim() || !category || !banner}
                     sx={{
                       bgcolor: "#2D31FA",
@@ -442,8 +450,8 @@ const CreateCommunity = () => {
                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
                   >
                     {loading ? 'Creating...' : 'Create Community'}
-                  </Button>
-                </motion.div>
+            </Button>
+          </motion.div>
               </Box>
             </Box>
           </Paper>

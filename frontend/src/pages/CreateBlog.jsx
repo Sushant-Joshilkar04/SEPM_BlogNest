@@ -13,7 +13,11 @@ import {
   FormControl,
   InputLabel,
   Container,
-  Paper
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
@@ -21,6 +25,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Uploadfile from '../utils/UploadFile';
 import { UserDock } from '../components/Dock';
+import Groq from "groq-sdk"; 
 
 const CreateBlog = () => {
   const navigate = useNavigate();
@@ -36,6 +41,40 @@ const CreateBlog = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [genAiInput, setGenAiInput] = useState('Hi');
+  const [openAIDialog, setOpenAIDialog] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true });
+
+  async function generateUsingAi() {
+    try {
+      setIsGenerating(true);
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: genAiInput,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+      });
+      
+      const generatedText = chatCompletion.choices[0]?.message?.content || "No response received from the AI.";
+      setGeneratedContent(generatedText);
+    } catch (error) {
+      console.error("Error generating AI completion:", error);
+      setError("Failed to generate content with AI");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  const handleAcceptContent = () => {
+    setContent(generatedContent);
+    setOpenAIDialog(false);
+  };
 
   useEffect(() => {
     fetchCommunities();
@@ -498,6 +537,21 @@ const CreateBlog = () => {
                   <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
                     Blog Content
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setOpenAIDialog(true)}
+                    sx={{
+                      mb: 2,
+                      color: "#2D31FA",
+                      borderColor: "rgba(45, 49, 250, 0.5)",
+                      "&:hover": {
+                        borderColor: "#2D31FA",
+                        bgcolor: "rgba(45, 49, 250, 0.04)"
+                      }
+                    }}
+                  >
+                    Generate using AI ✨
+                  </Button>
                   <TextField
                     multiline
                     rows={8}
@@ -580,6 +634,86 @@ const CreateBlog = () => {
           </motion.div>
         </Box>
       </Container>
+
+      {/* AI Content Generation Dialog */}
+      <Dialog 
+        open={openAIDialog} 
+        onClose={() => setOpenAIDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 8px 25px rgba(77, 97, 252, 0.15)",
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>Generate Blog Content with AI</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            value={genAiInput}
+            onChange={(e) => setGenAiInput(e.target.value)}
+            placeholder="Enter your prompt for the AI..."
+            sx={{ mb: 2, mt: 1 }}
+          />
+          
+          {generatedContent && (
+            <TextField
+              fullWidth
+              multiline
+              rows={8}
+              value={generatedContent}
+              InputProps={{ readOnly: true }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "rgba(77, 97, 252, 0.02)"
+                }
+              }}
+            />
+          )}
+          
+          {isGenerating && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress sx={{ color: "#2D31FA" }} />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, pt: 0 }}>
+          <Button 
+            onClick={() => setOpenAIDialog(false)}
+            sx={{ color: "text.secondary" }}
+          >
+            Cancel
+          </Button>
+          {!generatedContent ? (
+            <Button
+              onClick={generateUsingAi}
+              disabled={isGenerating || !genAiInput.trim()}
+              variant="contained"
+              sx={{
+                bgcolor: "#2D31FA",
+                "&:hover": { bgcolor: "#2024c9" }
+              }}
+            >
+              Generate
+            </Button>
+          ) : (
+            <Button
+              onClick={handleAcceptContent}
+              variant="contained"
+              sx={{
+                bgcolor: "#2D31FA",
+                "&:hover": { bgcolor: "#2024c9" }
+              }}
+            >
+              Use This Content
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
       {/* Wave Background - Bottom */}
       <Box

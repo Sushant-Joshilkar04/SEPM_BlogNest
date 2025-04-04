@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Edit, Delete, Article, Publish } from '@mui/icons-material';
 import { UserDock } from '../components/Dock';
 import axios from 'axios';
+import Groq from "groq-sdk"; 
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -35,6 +36,42 @@ const Profile = () => {
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
   const [success, setSuccess] = useState('');
+  // New AI generation states
+  const [openAIDialog, setOpenAIDialog] = useState(false);
+  const [genAiInput, setGenAiInput] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true });
+
+  // AI generation function
+  async function generateUsingAi() {
+    try {
+      setIsGenerating(true);
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: genAiInput,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+      });
+      
+      const generatedText = chatCompletion.choices[0]?.message?.content || "No response received from the AI.";
+      setGeneratedContent(generatedText);
+    } catch (error) {
+      console.error("Error generating AI completion:", error);
+      setError("Failed to generate content with AI");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  const handleAcceptContent = () => {
+    setEditedContent(generatedContent);
+    setOpenAIDialog(false);
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -79,6 +116,7 @@ const Profile = () => {
     setEditedTitle(post.title);
     setEditedContent(post.content);
     setEditMode(true);
+    setGenAiInput(`Improve this blog post title: "${post.title}" and content: "${post.content}"`);
   };
 
   const handlePublishDraft = async (postId) => {
@@ -108,31 +146,31 @@ const Profile = () => {
     }
   };
 
-  const handleUpdate = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Update title
-      await axios.put('http://localhost:5000/api/posts/updateposttitle', 
+    const handleUpdate = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        // Update title
+        await axios.put('http://localhost:5000/api/posts/updateposttitle', 
         { postId: editedPost._id, title: editedTitle },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // Update content
-      await axios.put('http://localhost:5000/api/posts/updatepostcontent',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+        // Update content
+        await axios.put('http://localhost:5000/api/posts/updatepostcontent',
         { postId: editedPost._id, content: editedContent },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setEditMode(false);
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+        setEditMode(false);
       setEditedPost(null);
       fetchUserProfile();
       setSuccess('Post updated successfully!');
-    } catch (error) {
-      console.error('Error updating post:', error);
-      setError('Failed to update post');
-    }
-  };
+      } catch (error) {
+        console.error('Error updating post:', error);
+        setError('Failed to update post');
+      }
+    };
 
   const filteredPosts = user?.posts?.filter(post => post.isDraft === showDrafts) || [];
 
@@ -199,9 +237,9 @@ const Profile = () => {
           >
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <Avatar 
-                  src={user?.avatar} 
-                  alt={user?.name}
+              <Avatar 
+                src={user?.avatar} 
+                alt={user?.name}
                   sx={{ 
                     width: 100, 
                     height: 100,
@@ -220,8 +258,8 @@ const Profile = () => {
                     {user?.name}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                    {user?.email}
-                  </Typography>
+                  {user?.email}
+                </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography 
                       variant="body2" 
@@ -232,13 +270,13 @@ const Profile = () => {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Posts
-                    </Typography>
+                </Typography>
                   </Box>
                 </Box>
               </Box>
             </CardContent>
           </Card>
-        </motion.div>
+          </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -255,7 +293,7 @@ const Profile = () => {
               }}
             >
               {showDrafts ? 'My Drafts' : 'My Blogs'}
-            </Typography>
+          </Typography>
             
             <Button
               variant={showDrafts ? "contained" : "outlined"}
@@ -278,17 +316,17 @@ const Profile = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
-            gap: 4,
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" },
+            gap: 3,
           }}
         >
-          <AnimatePresence>
+            <AnimatePresence>
             {filteredPosts.map((post, index) => (
-              <motion.div
-                key={post._id}
+                <motion.div
+                  key={post._id}
                 initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
                 whileHover={{ scale: 1.03, y: -5 }}
               >
@@ -300,113 +338,152 @@ const Profile = () => {
                     boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
                     border: "1px solid rgba(77, 97, 252, 0.08)",
                     transition: "box-shadow 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    maxWidth: "100%",
                     "&:hover": {
                       boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
                     }
                   }}
                 >
                   {post.banner && (
-                    <CardMedia
-                      component="img"
-                      height="140"
-                      image={post.banner}
-                      alt={post.title}
-                      sx={{ objectFit: "cover" }}
-                    />
+                    <Box sx={{ position: "relative", height: "120px", overflow: "hidden" }}>
+                      <CardMedia
+                        component="img"
+                        image={post.banner}
+                        alt={post.title}
+                        sx={{ 
+                          height: "100%",
+                          objectFit: "cover",
+                          objectPosition: "center"
+                        }}
+                      />
+                    </Box>
                   )}
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
                     <Typography 
                       variant="h6" 
                       sx={{ 
                         fontWeight: 600,
-                        mb: 2,
+                        mb: 1,
                         color: "#333",
+                        fontSize: "1rem",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical"
+                        WebkitBoxOrient: "vertical",
+                        lineHeight: 1.3
                       }}
                     >
-                      {post.title}
-                    </Typography>
-                    
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, my: 2 }}>
-                      {post.tags?.map((tag, idx) => (
-                        <Chip
-                          key={idx}
-                          label={tag}
-                          size="small"
+                        {post.title}
+                      </Typography>
+                      
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}>
+                      {post.tags?.slice(0, 3).map((tag, idx) => (
+                          <Chip
+                            key={idx}
+                            label={tag}
+                            size="small"
                           sx={{ 
                             background: "rgba(45, 49, 250, 0.06)",
                             borderColor: "rgba(45, 49, 250, 0.3)",
                             color: "#2D31FA",
                             fontWeight: 500,
+                            height: "20px",
+                            fontSize: "0.7rem",
                           }}
-                        />
-                      ))}
+                          />
+                        ))}
+                      {post.tags?.length > 3 && (
+                        <Typography variant="caption" sx={{ color: "#666" }}>
+                          +{post.tags.length - 3} more
+                        </Typography>
+                      )}
                     </Box>
 
-                    <Divider sx={{ my: 2, borderColor: "rgba(0, 0, 0, 0.06)" }} />
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{ 
+                        mb: 1.5,
+                        fontSize: "0.8rem",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        flexGrow: 1,
+                        lineHeight: 1.4
+                      }}
+                    >
+                      {post.content}
+                    </Typography>
 
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                      <Button
-                        startIcon={<Article />}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto" }}>
+                        <Button
+                        startIcon={<Article sx={{ fontSize: 16 }} />}
                         onClick={() => navigate(`/blog/${post._id}`)}
                         sx={{
                           color: "#2D31FA",
                           textTransform: "none",
                           fontWeight: 600,
+                          fontSize: "0.8rem",
+                          padding: "4px 8px",
+                          minWidth: 0,
                           "&:hover": {
                             background: "rgba(45, 49, 250, 0.05)"
                           }
                         }}
-                      >
-                        View
-                      </Button>
+                        >
+                          View
+                        </Button>
                       <Box>
                         <IconButton 
                           sx={{
                             color: "#2D31FA",
+                            padding: "4px",
                             "&:hover": {
                               background: "rgba(45, 49, 250, 0.05)"
                             }
                           }}
                           onClick={() => handleEditClick(post)}
                         >
-                          <Edit fontSize="small" />
+                          <Edit fontSize="small" sx={{ fontSize: 16 }} />
                         </IconButton>
                         {post.isDraft && (
                           <IconButton 
                             sx={{
                               color: "#4caf50",
+                              padding: "4px",
                               "&:hover": {
                                 background: "rgba(76, 175, 80, 0.05)"
                               }
                             }}
                             onClick={() => handlePublishDraft(post._id)}
                           >
-                            <Publish fontSize="small" />
+                            <Publish fontSize="small" sx={{ fontSize: 16 }} />
                           </IconButton>
                         )}
-                        <IconButton 
+                          <IconButton 
                           sx={{
                             color: "#d32f2f",
+                            padding: "4px",
                             "&:hover": {
                               background: "rgba(211, 47, 47, 0.05)"
                             }
                           }}
-                          onClick={() => handleDeleteBlog(post._id)}
-                        >
-                          <Delete fontSize="small" />
+                            onClick={() => handleDeleteBlog(post._id)}
+                          >
+                          <Delete fontSize="small" sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
                     </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
         </Box>
         
         {filteredPosts.length === 0 && (
@@ -453,6 +530,26 @@ const Profile = () => {
               fullWidth
               variant="outlined"
             />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#333" }}>
+                Content
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => setOpenAIDialog(true)}
+                sx={{
+                  mb: 1,
+                  color: "#2D31FA",
+                  borderColor: "rgba(45, 49, 250, 0.5)",
+                  "&:hover": {
+                    borderColor: "#2D31FA",
+                    bgcolor: "rgba(45, 49, 250, 0.04)"
+                  }
+                }}
+              >
+                Improve with AI ✨
+              </Button>
+            </Box>
             <TextField
               label="Content"
               value={editedContent}
@@ -478,6 +575,86 @@ const Profile = () => {
           >
             Save Changes
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* AI Content Generation Dialog */}
+      <Dialog 
+        open={openAIDialog} 
+        onClose={() => setOpenAIDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 8px 25px rgba(77, 97, 252, 0.15)",
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>Improve Content with AI</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            value={genAiInput}
+            onChange={(e) => setGenAiInput(e.target.value)}
+            placeholder="Enter your prompt for the AI..."
+            sx={{ mb: 2, mt: 1 }}
+          />
+          
+          {generatedContent && (
+            <TextField
+              fullWidth
+              multiline
+              rows={8}
+              value={generatedContent}
+              InputProps={{ readOnly: true }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "rgba(77, 97, 252, 0.02)"
+                }
+              }}
+            />
+          )}
+          
+          {isGenerating && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress sx={{ color: "#2D31FA" }} />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, pt: 0 }}>
+          <Button 
+            onClick={() => setOpenAIDialog(false)}
+            sx={{ color: "text.secondary" }}
+          >
+            Cancel
+          </Button>
+          {!generatedContent ? (
+            <Button
+              onClick={generateUsingAi}
+              disabled={isGenerating || !genAiInput.trim()}
+              variant="contained"
+              sx={{
+                bgcolor: "#2D31FA",
+                "&:hover": { bgcolor: "#2024c9" }
+              }}
+            >
+              Generate
+            </Button>
+          ) : (
+            <Button
+              onClick={handleAcceptContent}
+              variant="contained"
+              sx={{
+                bgcolor: "#2D31FA",
+                "&:hover": { bgcolor: "#2024c9" }
+              }}
+            >
+              Use This Content
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Box>

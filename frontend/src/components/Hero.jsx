@@ -6,6 +6,29 @@ import heroImage from "../assets/image.png";
 const Hero = () => {
   const navigate = useNavigate();
 
+  const handleGetStarted = () => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
+
+    if (token) {
+      // Navigate based on user role
+      switch (userRole) {
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'moderator':
+          navigate('/moderator/dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+          break;
+      }
+    } else {
+      // If no token, navigate to auth page
+      navigate('/auth');
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -81,7 +104,7 @@ const Hero = () => {
                   mx: { xs: "auto", md: 0 },
                 }}
               >
-                At BlogNest, every idea finds its wings—whether you’re sharing stories, insights, or sparking meaningful conversations.
+                At BlogNest, every idea finds its wings—whether you're sharing stories, insights, or sparking meaningful conversations.
               </Typography>
 
               <Box sx={{ display: "flex", justifyContent: { xs: "center", md: "flex-start" } }}>
@@ -104,7 +127,7 @@ const Hero = () => {
                         bgcolor: "#2024c9",
                       },
                     }}
-                    onClick={() => navigate("/auth")}
+                    onClick={handleGetStarted}
                   >
                     Get Started
                   </Button>
