@@ -17,7 +17,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  FormControl,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit, Delete, Article, Publish } from '@mui/icons-material';
@@ -87,7 +90,17 @@ const Profile = () => {
       });
 
       if (response.data.success) {
-        setUser(response.data.data[0]);
+        const userData = response.data.data[0];
+        setUser(userData);
+        
+        // Calculate counts
+        const drafts = userData.posts.filter(post => post.isDraft).length;
+        const published = userData.posts.filter(post => !post.isDraft).length;
+        const communities = userData.communities?.length || 0;
+        
+        setDraftCount(drafts);
+        setPublishedCount(published);
+        setCommunityCount(communities);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -104,16 +117,25 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` },
         data: { postId }
       });
+      
+      toast.success('Post deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       fetchUserProfile(); // Refresh profile after deletion
     } catch (error) {
       console.error('Error deleting blog:', error);
-      setError('Failed to delete blog');
+      toast.error(error.response?.data?.message || 'Failed to delete blog');
     }
   };
 
   const handleEditClick = (post) => {
-    setEditedPost(post);
     setEditedTitle(post.title);
+    setEditedPost(post);
     setEditedContent(post.content);
     setEditMode(true);
     setGenAiInput(`Improve this blog post title: "${post.title}" and content: "${post.content}"`);
@@ -123,26 +145,33 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       const userId = JSON.parse(localStorage.getItem('user'))._id;
-
       await axios.put('http://localhost:5000/api/posts/publishdraft', 
         { 
           postId,
           id: userId
         },
         { 
-          headers: { 
+          headers: {  
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
           } 
         }
       );
 
-      setSuccess('Post published successfully!');
+      toast.success('Draft published successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
       fetchUserProfile(); // Refresh the profile to update the lists
       setShowDrafts(false); // Switch to posts view after publishing
     } catch (error) {
       console.error('Error publishing draft:', error);
-      setError(error.response?.data?.message || 'Failed to publish draft');
+      toast.error(error.response?.data?.message || 'Failed to publish draft');
     }
   };
 
@@ -172,7 +201,20 @@ const Profile = () => {
       }
     };
 
-  const filteredPosts = user?.posts?.filter(post => post.isDraft === showDrafts) || [];
+  const getFilteredContent = () => {
+    switch(selectedView) {
+      case 'blogs':
+        return user?.posts?.filter(post => !post.isDraft) || [];
+      case 'drafts':
+        return user?.posts?.filter(post => post.isDraft) || [];
+      case 'communities':
+        return user?.communities || [];
+      default:
+        return [];
+    }
+  };
+
+  const filteredContent = getFilteredContent();
 
   if (loading) {
     return (
@@ -191,31 +233,44 @@ const Profile = () => {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        position: "relative",
-        overflow: "hidden",
-        background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
-        pb: 10,
-        pt: 2,
-      }}
-    >
-      {/* Wave Background - Top */}
+    // <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+    //   <ToastContainer
+    //     position="top-right"
+    //     autoClose={3000}
+    //     hideProgressBar={false}
+    //     newestOnTop
+    //     closeOnClick
+    //     rtl={false}
+    //     pauseOnFocusLoss
+    //     draggable
+    //     pauseOnHover
+    //     theme="light"
+    //   />
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "30%",
-          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
-          borderBottomLeftRadius: "50% 20%",
-          borderBottomRightRadius: "50% 20%",
-          transform: "scale(1.5)",
-          zIndex: 0,
+          minHeight: "100vh",
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(90deg, #f0f2ff 0%, #e6e9ff 100%)",
+          pb: 10,
+          pt: 2,
         }}
-      />
+      >
+        {/* Wave Background - Top */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "30%",
+            background: "linear-gradient(180deg, rgba(77, 97, 252, 0.1) 0%, rgba(77, 97, 252, 0.02) 100%)",
+            borderBottomLeftRadius: "50% 20%",
+            borderBottomRightRadius: "50% 20%",
+            transform: "scale(1.5)",
+            zIndex: 0,
+          }}
+        />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
         <motion.div
@@ -495,23 +550,22 @@ const Profile = () => {
         )}
       </Container>
 
-      {/* Wave Background - Bottom */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "30%",
-          background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
-          borderTopLeftRadius: "50% 30%",
-          borderTopRightRadius: "50% 30%",
-          transform: "scale(1.5)",
-          zIndex: 0,
-        }}
-      />
-      
-      <UserDock />
+        {/* Wave Background - Bottom */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "30%",
+            background: "linear-gradient(180deg, rgba(77, 97, 252, 0.02) 0%, rgba(77, 97, 252, 0.1) 100%)",
+            borderTopLeftRadius: "50% 30%",
+            borderTopRightRadius: "50% 30%",
+            transform: "scale(1.5)",
+            zIndex: 0,
+          }}
+        />
+        <UserDock />
 
       {/* Edit Dialog */}
       <Dialog 
