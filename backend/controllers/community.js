@@ -7,7 +7,8 @@ const mongoose = require('mongoose');
 exports.createcommunity = async (req,res) =>{
     try 
     {
-        const { name, description, banner, category, creator } = req.body;
+        const { name, description, banner, category, autoJoin } = req.body;
+        const creator = req.user.id;
 
         const communityCreated = await Community.create({
             name,
@@ -251,75 +252,116 @@ exports.updateCommunityDescription = async (req,res) => {
 exports.joinCommunity = async (req,res) => {
     try 
     {
-        const id = req.body.id;
-        const community = req.body.community;
+        const userId = req.user.id;
+        const { communityId } = req.body;
 
-        const communityUpdated = await Community.findByIdAndUpdate({_id : community},{
-            $push : {
-                members : id
-            }
-        })
-        const userUpdated = await User.findByIdAndUpdate({_id : id},{
-            $push : 
+        if (!communityId) {
+            return res.status(400).json({
+                success: false,
+                message: "Community ID is required"
+            });
+        }
+
+        const communityUpdated = await Community.findByIdAndUpdate(
+            communityId,
             {
-                community : community
-            }
-        })
+                $addToSet: { members: userId }
+            },
+            { new: true }
+        );
+
+        if (!communityUpdated) {
+            return res.status(404).json({
+                success: false,
+                message: "Community not found"
+            });
+        }
+
+        const userUpdated = await User.findByIdAndUpdate(
+            userId,
+            {
+                $addToSet: { community: communityId }
+            },
+            { new: true }
+        );
 
         return res.status(200).json({
-            success : true,
-            message : "Joined Community successfully",
-        })
+            success: true,
+            message: "Joined Community successfully",
+        });
     }
     catch(error)
     {
-        console.log(error.message);
+        console.error("Error joining community:", error);
         return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
+            success: false,
+            message: "Internal Server Error"
+        });
     }  
 }
 
 exports.leaveCommunity = async (req,res) => {
     try 
     {
-        const id = req.body.id;
-        const community = req.body.community;
+        const userId = req.user.id;
+        const { communityId } = req.body;
 
-        const communityUpdated = await Community.findByIdAndUpdate({_id : community},{
-            $pull : {
-                members : id
-            }
-        })
-        const userUpdated = await User.findByIdAndUpdate({_id : id},{
-            $pull : {
-                community : community
-            }
-        })
+        if (!communityId) {
+            return res.status(400).json({
+                success: false,
+                message: "Community ID is required"
+            });
+        }
+
+        const communityUpdated = await Community.findByIdAndUpdate(
+            communityId,
+            {
+                $pull: { members: userId }
+            },
+            { new: true }
+        );
+
+        if (!communityUpdated) {
+            return res.status(404).json({
+                success: false,
+                message: "Community not found"
+            });
+        }
+
+        const userUpdated = await User.findByIdAndUpdate(
+            userId,
+            {
+                $pull: { community: communityId }
+            },
+            { new: true }
+        );
 
         return res.status(200).json({
-            success : true,
-            message : "Left Community successfully",
-        })
+            success: true,
+            message: "Left Community successfully",
+        });
     }
     catch(error)
     {
-        console.log(error.message);
+        console.error("Error leaving community:", error);
         return res.status(500).json({
-            success : false,
-            message : "Internal Server Error"
-        })
+            success: false,
+            message: "Internal Server Error"
+        });
     }  
 }
 
 exports.getUserCommunities = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const communities = await Community.find({ members: userId });
+        const userId = req.user.id;
+        
+        const communities = await Community.find({ members: userId })
+            .populate('admin', 'firstName lastName')
+            .exec();
         
         res.status(200).json({
             success: true,
+            message: "User communities fetched successfully",
             data: communities
         });
     } catch (error) {

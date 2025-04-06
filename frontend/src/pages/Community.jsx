@@ -14,12 +14,14 @@ import {
   CircularProgress,
   TextField,
   InputAdornment,
-  Grid
+  Grid,
+  Divider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ArticleIcon from '@mui/icons-material/Article';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -29,9 +31,12 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
+  const [joiningInProgress, setJoiningInProgress] = useState(null);
 
   useEffect(() => {
     fetchCommunities();
+    fetchUserJoinedCommunities();
   }, []);
 
   const fetchCommunities = async () => {
@@ -45,6 +50,87 @@ const Community = () => {
       setError('Failed to fetch communities');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserJoinedCommunities = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.get('http://localhost:5000/api/community/getUserCommunities', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data.success) {
+        // Store IDs of joined communities for easy checking
+        const joinedIds = response.data.data.map(community => community._id);
+        setJoinedCommunities(joinedIds);
+      }
+    } catch (error) {
+      console.error('Error fetching joined communities:', error);
+    }
+  };
+
+  const handleJoinCommunity = async (communityId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Please login to join communities');
+        return;
+      }
+
+      setJoiningInProgress(communityId);
+      
+      const response = await axios.post(
+        'http://localhost:5000/api/community/joinCommunity',
+        { communityId },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        // Add to joined communities
+        setJoinedCommunities([...joinedCommunities, communityId]);
+        toast.success('Successfully joined community!');
+      }
+    } catch (error) {
+      console.error('Error joining community:', error);
+      toast.error(error.response?.data?.message || 'Failed to join community');
+    } finally {
+      setJoiningInProgress(null);
+    }
+  };
+
+  const handleLeaveCommunity = async (communityId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Please login to leave communities');
+        return;
+      }
+
+      setJoiningInProgress(communityId);
+      
+      const response = await axios.post(
+        'http://localhost:5000/api/community/leaveCommunity',
+        { communityId },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        // Remove from joined communities
+        setJoinedCommunities(joinedCommunities.filter(id => id !== communityId));
+        toast.success('Left community successfully');
+      }
+    } catch (error) {
+      console.error('Error leaving community:', error);
+      toast.error(error.response?.data?.message || 'Failed to leave community');
+    } finally {
+      setJoiningInProgress(null);
     }
   };
 
@@ -68,6 +154,8 @@ const Community = () => {
     console.log('Navigating to community:', communityId);
     navigate(`/community/${communityId}/blogs`);
   };
+
+  const isJoined = (communityId) => joinedCommunities.includes(communityId);
 
   const filteredCommunities = communities.filter(community =>
     community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -293,27 +381,76 @@ const Community = () => {
                     >
                       {community.description}
                     </Typography>
+                    
+                    <Divider sx={{ my: 1, borderColor: "rgba(45, 49, 250, 0.08)" }} />
+                    
                     <Box 
                       sx={{ 
                         display: "flex", 
-                        justifyContent: "space-between", 
-                        mt: 'auto',
-                        pt: 1,
-                        borderTop: "1px solid rgba(45, 49, 250, 0.08)"
+                        flexDirection: "column",
+                        gap: 1
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <PeopleAltIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
-                        <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
-                          {community.members?.length || 0}
-                        </Typography>
+                      <Box 
+                        sx={{ 
+                          display: "flex", 
+                          justifyContent: "space-between", 
+                          alignItems: "center"
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                          <PeopleAltIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
+                          <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
+                            {community.members?.length || 0}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                          <ArticleIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
+                          <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
+                            {community.posts?.length || 0}
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <ArticleIcon sx={{ fontSize: 16, color: "#2D31FA" }} />
-                        <Typography variant="caption" sx={{ color: "#2D31FA", fontWeight: 500 }}>
-                          {community.posts?.length || 0}
-                        </Typography>
-                      </Box>
+                      
+                      <Button
+                        variant={isJoined(community._id) ? "outlined" : "contained"}
+                        size="small"
+                        startIcon={isJoined(community._id) ? <CheckCircleIcon /> : null}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isJoined(community._id)) {
+                            handleLeaveCommunity(community._id);
+                          } else {
+                            handleJoinCommunity(community._id);
+                          }
+                        }}
+                        sx={{
+                          mt: 1,
+                          textTransform: "none",
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          fontSize: "0.75rem",
+                          py: 0.5,
+                          ...(isJoined(community._id) 
+                            ? {
+                                color: "#2D31FA",
+                                borderColor: "rgba(45, 49, 250, 0.5)",
+                                "&:hover": { borderColor: "#2D31FA", bgcolor: "rgba(45, 49, 250, 0.04)" }
+                              }
+                            : {
+                                bgcolor: "#2D31FA",
+                                "&:hover": { bgcolor: "#2024c9" }
+                              }
+                          )
+                        }}
+                        disabled={joiningInProgress === community._id}
+                      >
+                        {joiningInProgress === community._id ? (
+                          <CircularProgress size={14} sx={{ color: isJoined(community._id) ? "#2D31FA" : "white" }} />
+                        ) : (
+                          isJoined(community._id) ? "Joined" : "Join Community"
+                        )}
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>

@@ -27,6 +27,8 @@ import { Edit, Delete, Article, Publish } from '@mui/icons-material';
 import { UserDock } from '../components/Dock';
 import axios from 'axios';
 import Groq from "groq-sdk"; 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -39,6 +41,10 @@ const Profile = () => {
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
   const [success, setSuccess] = useState('');
+  const [selectedView, setSelectedView] = useState('blogs');
+  const [draftCount, setDraftCount] = useState(0);
+  const [publishedCount, setPublishedCount] = useState(0);
+  const [communityCount, setCommunityCount] = useState(0);
   // New AI generation states
   const [openAIDialog, setOpenAIDialog] = useState(false);
   const [genAiInput, setGenAiInput] = useState('');
@@ -202,19 +208,14 @@ const Profile = () => {
     };
 
   const getFilteredContent = () => {
-    switch(selectedView) {
-      case 'blogs':
-        return user?.posts?.filter(post => !post.isDraft) || [];
-      case 'drafts':
-        return user?.posts?.filter(post => post.isDraft) || [];
-      case 'communities':
-        return user?.communities || [];
-      default:
-        return [];
+    if (showDrafts) {
+      return user?.posts?.filter(post => post.isDraft) || [];
+    } else {
+      return user?.posts?.filter(post => !post.isDraft) || [];
     }
   };
 
-  const filteredContent = getFilteredContent();
+  const filteredPosts = getFilteredContent();
 
   if (loading) {
     return (
@@ -233,19 +234,20 @@ const Profile = () => {
   }
 
   return (
-    // <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-    //   <ToastContainer
-    //     position="top-right"
-    //     autoClose={3000}
-    //     hideProgressBar={false}
-    //     newestOnTop
-    //     closeOnClick
-    //     rtl={false}
-    //     pauseOnFocusLoss
-    //     draggable
-    //     pauseOnHover
-    //     theme="light"
-    //   />
+    <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      
       <Box
         sx={{
           minHeight: "100vh",
@@ -272,283 +274,283 @@ const Profile = () => {
           }}
         />
 
-      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Profile Header */}
-          <Card 
-            elevation={0}
-            sx={{ 
-              mb: 6, 
-              borderRadius: 3,
-              overflow: "hidden",
-              background: "white",
-              boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
-              border: "1px solid rgba(77, 97, 252, 0.08)"
-            }}
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <CardContent sx={{ p: 4 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <Avatar 
-                src={user?.avatar} 
-                alt={user?.name}
-                  sx={{ 
-                    width: 100, 
-                    height: 100,
-                    border: "4px solid rgba(77, 97, 252, 0.1)" 
-                  }}
-                />
-                <Box>
-                  <Typography 
-                    variant="h4" 
+            {/* Profile Header */}
+            <Card 
+              elevation={0}
+              sx={{ 
+                mb: 6, 
+                borderRadius: 3,
+                overflow: "hidden",
+                background: "white",
+                boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)",
+                border: "1px solid rgba(77, 97, 252, 0.08)"
+              }}
+            >
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <Avatar 
+                  src={user?.avatar} 
+                  alt={user?.name}
                     sx={{ 
-                      fontWeight: 700,
-                      color: "#333",
-                      mb: 0.5
+                      width: 100, 
+                      height: 100,
+                      border: "4px solid rgba(77, 97, 252, 0.1)" 
                     }}
-                  >
-                    {user?.name}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                  {user?.email}
-                </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  />
+                  <Box>
                     <Typography 
-                      variant="body2" 
-                      fontWeight="600"
-                      sx={{ color: "#2D31FA" }}
+                      variant="h4" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: "#333",
+                        mb: 0.5
+                      }}
                     >
-                      {user?.posts?.length || 0}
+                      {user?.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Posts
-                </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                    {user?.email}
+                  </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography 
+                        variant="body2" 
+                        fontWeight="600"
+                        sx={{ color: "#2D31FA" }}
+                      >
+                        {user?.posts?.length || 0}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Posts
+                  </Typography>
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-          </motion.div>
+              </CardContent>
+            </Card>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography
-              variant="h4"
-              fontWeight="700"
-              color="#2D31FA"
-              sx={{
-                letterSpacing: "0.02em",
-              }}
-            >
-              {showDrafts ? 'My Drafts' : 'My Blogs'}
-          </Typography>
-            
-            <Button
-              variant={showDrafts ? "contained" : "outlined"}
-              onClick={() => setShowDrafts(!showDrafts)}
-              sx={{
-                color: showDrafts ? "white" : "#2D31FA",
-                bgcolor: showDrafts ? "#2D31FA" : "transparent",
-                borderColor: "#2D31FA",
-                '&:hover': {
-                  bgcolor: showDrafts ? "#2024c9" : "rgba(45, 49, 250, 0.04)",
-                  borderColor: "#2D31FA"
-                }
-              }}
-            >
-              {showDrafts ? 'View Posts' : 'View Drafts'}
-            </Button>
-          </Box>
-        </motion.div>
-          
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" },
-            gap: 3,
-          }}
-        >
-            <AnimatePresence>
-            {filteredPosts.map((post, index) => (
-                <motion.div
-                  key={post._id}
-                initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                whileHover={{ scale: 1.03, y: -5 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Typography
+                variant="h4"
+                fontWeight="700"
+                color="#2D31FA"
+                sx={{
+                  letterSpacing: "0.02em",
+                }}
               >
-                <Card 
-                  sx={{
-                    height: "100%",
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
-                    border: "1px solid rgba(77, 97, 252, 0.08)",
-                    transition: "box-shadow 0.3s ease",
-                    display: "flex",
-                    flexDirection: "column",
-                    maxWidth: "100%",
-                    "&:hover": {
-                      boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
-                    }
-                  }}
+                {showDrafts ? 'My Drafts' : 'My Blogs'}
+            </Typography>
+              
+              <Button
+                variant={showDrafts ? "contained" : "outlined"}
+                onClick={() => setShowDrafts(!showDrafts)}
+                sx={{
+                  color: showDrafts ? "white" : "#2D31FA",
+                  bgcolor: showDrafts ? "#2D31FA" : "transparent",
+                  borderColor: "#2D31FA",
+                  '&:hover': {
+                    bgcolor: showDrafts ? "#2024c9" : "rgba(45, 49, 250, 0.04)",
+                    borderColor: "#2D31FA"
+                  }
+                }}
+              >
+                {showDrafts ? 'View Posts' : 'View Drafts'}
+              </Button>
+            </Box>
+          </motion.div>
+            
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" },
+              gap: 3,
+            }}
+          >
+              <AnimatePresence>
+              {filteredPosts.map((post, index) => (
+                  <motion.div
+                    key={post._id}
+                  initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  whileHover={{ scale: 1.03, y: -5 }}
                 >
-                  {post.banner && (
-                    <Box sx={{ position: "relative", height: "120px", overflow: "hidden" }}>
-                      <CardMedia
-                        component="img"
-                        image={post.banner}
-                        alt={post.title}
-                        sx={{ 
-                          height: "100%",
-                          objectFit: "cover",
-                          objectPosition: "center"
-                        }}
-                      />
-                    </Box>
-                  )}
-                  <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        fontWeight: 600,
-                        mb: 1,
-                        color: "#333",
-                        fontSize: "1rem",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        lineHeight: 1.3
-                      }}
-                    >
-                        {post.title}
-                      </Typography>
-                      
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}>
-                      {post.tags?.slice(0, 3).map((tag, idx) => (
-                          <Chip
-                            key={idx}
-                            label={tag}
-                            size="small"
+                  <Card 
+                    sx={{
+                      height: "100%",
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      boxShadow: "0 8px 20px rgba(77, 97, 252, 0.1)",
+                      border: "1px solid rgba(77, 97, 252, 0.08)",
+                      transition: "box-shadow 0.3s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      maxWidth: "100%",
+                      "&:hover": {
+                        boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
+                      }
+                    }}
+                  >
+                    {post.banner && (
+                      <Box sx={{ position: "relative", height: "120px", overflow: "hidden" }}>
+                        <CardMedia
+                          component="img"
+                          image={post.banner}
+                          alt={post.title}
                           sx={{ 
-                            background: "rgba(45, 49, 250, 0.06)",
-                            borderColor: "rgba(45, 49, 250, 0.3)",
-                            color: "#2D31FA",
-                            fontWeight: 500,
-                            height: "20px",
-                            fontSize: "0.7rem",
+                            height: "100%",
+                            objectFit: "cover",
+                            objectPosition: "center"
                           }}
-                          />
-                        ))}
-                      {post.tags?.length > 3 && (
-                        <Typography variant="caption" sx={{ color: "#666" }}>
-                          +{post.tags.length - 3} more
-                        </Typography>
-                      )}
-                    </Box>
-
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
-                      sx={{ 
-                        mb: 1.5,
-                        fontSize: "0.8rem",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        flexGrow: 1,
-                        lineHeight: 1.4
-                      }}
-                    >
-                      {post.content}
-                    </Typography>
-
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto" }}>
-                        <Button
-                        startIcon={<Article sx={{ fontSize: 16 }} />}
-                        onClick={() => navigate(`/blog/${post._id}`)}
-                        sx={{
-                          color: "#2D31FA",
-                          textTransform: "none",
+                        />
+                      </Box>
+                    )}
+                    <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
                           fontWeight: 600,
-                          fontSize: "0.8rem",
-                          padding: "4px 8px",
-                          minWidth: 0,
-                          "&:hover": {
-                            background: "rgba(45, 49, 250, 0.05)"
-                          }
+                          mb: 1,
+                          color: "#333",
+                          fontSize: "1rem",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          lineHeight: 1.3
                         }}
-                        >
-                          View
-                        </Button>
-                      <Box>
-                        <IconButton 
+                      >
+                          {post.title}
+                        </Typography>
+                        
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}>
+                        {post.tags?.slice(0, 3).map((tag, idx) => (
+                            <Chip
+                              key={idx}
+                              label={tag}
+                              size="small"
+                            sx={{ 
+                              background: "rgba(45, 49, 250, 0.06)",
+                              borderColor: "rgba(45, 49, 250, 0.3)",
+                              color: "#2D31FA",
+                              fontWeight: 500,
+                              height: "20px",
+                              fontSize: "0.7rem",
+                            }}
+                            />
+                          ))}
+                        {post.tags?.length > 3 && (
+                          <Typography variant="caption" sx={{ color: "#666" }}>
+                            +{post.tags.length - 3} more
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ 
+                          mb: 1.5,
+                          fontSize: "0.8rem",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          flexGrow: 1,
+                          lineHeight: 1.4
+                        }}
+                      >
+                        {post.content}
+                      </Typography>
+
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "auto" }}>
+                          <Button
+                          startIcon={<Article sx={{ fontSize: 16 }} />}
+                          onClick={() => navigate(`/blog/${post._id}`)}
                           sx={{
                             color: "#2D31FA",
-                            padding: "4px",
+                            textTransform: "none",
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            padding: "4px 8px",
+                            minWidth: 0,
                             "&:hover": {
                               background: "rgba(45, 49, 250, 0.05)"
                             }
                           }}
-                          onClick={() => handleEditClick(post)}
-                        >
-                          <Edit fontSize="small" sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        {post.isDraft && (
+                          >
+                            View
+                          </Button>
+                        <Box>
                           <IconButton 
                             sx={{
-                              color: "#4caf50",
+                              color: "#2D31FA",
                               padding: "4px",
                               "&:hover": {
-                                background: "rgba(76, 175, 80, 0.05)"
+                                background: "rgba(45, 49, 250, 0.05)"
                               }
                             }}
-                            onClick={() => handlePublishDraft(post._id)}
+                            onClick={() => handleEditClick(post)}
                           >
-                            <Publish fontSize="small" sx={{ fontSize: 16 }} />
+                            <Edit fontSize="small" sx={{ fontSize: 16 }} />
                           </IconButton>
-                        )}
-                          <IconButton 
-                          sx={{
-                            color: "#d32f2f",
-                            padding: "4px",
-                            "&:hover": {
-                              background: "rgba(211, 47, 47, 0.05)"
-                            }
-                          }}
-                            onClick={() => handleDeleteBlog(post._id)}
-                          >
-                          <Delete fontSize="small" sx={{ fontSize: 16 }} />
-                        </IconButton>
+                          {post.isDraft && (
+                            <IconButton 
+                              sx={{
+                                color: "#4caf50",
+                                padding: "4px",
+                                "&:hover": {
+                                  background: "rgba(76, 175, 80, 0.05)"
+                                }
+                              }}
+                              onClick={() => handlePublishDraft(post._id)}
+                            >
+                              <Publish fontSize="small" sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          )}
+                            <IconButton 
+                            sx={{
+                              color: "#d32f2f",
+                              padding: "4px",
+                              "&:hover": {
+                                background: "rgba(211, 47, 47, 0.05)"
+                              }
+                            }}
+                              onClick={() => handleDeleteBlog(post._id)}
+                            >
+                            <Delete fontSize="small" sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
-                    </Box>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-        </Box>
-        
-        {filteredPosts.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 8 }}>
-            <Typography variant="h6" color="text.secondary">
-              {showDrafts ? 'No drafts found.' : 'No posts found.'}
-            </Typography>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
           </Box>
-        )}
-      </Container>
+          
+          {filteredPosts.length === 0 && (
+            <Box sx={{ textAlign: "center", py: 8 }}>
+              <Typography variant="h6" color="text.secondary">
+                {showDrafts ? 'No drafts found.' : 'No posts found.'}
+              </Typography>
+            </Box>
+          )}
+        </Container>
 
         {/* Wave Background - Bottom */}
         <Box
@@ -566,13 +568,20 @@ const Profile = () => {
           }}
         />
         <UserDock />
-
-      {/* Edit Dialog */}
+      </Box>
+      
+      {/* Edit Post Dialog */}
       <Dialog 
         open={editMode} 
         onClose={() => setEditMode(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 8px 25px rgba(77, 97, 252, 0.15)",
+          }
+        }}
       >
         <DialogTitle>Edit Post</DialogTitle>
         <DialogContent>

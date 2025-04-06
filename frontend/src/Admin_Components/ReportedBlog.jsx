@@ -27,11 +27,11 @@ const ReportedBlog = () => {
     fetchReportedPosts();
   }, []);
 
-  const fetchReportedPosts = async () => {
-    try {
-      const token = localStorage.getItem('token');
+    const fetchReportedPosts = async () => {
+      try {
+        const token = localStorage.getItem('token');
 
-      if (!token) {
+        if (!token) {
         setError('Unauthorized: No token found');
         setLoading(false);
         return;
@@ -43,7 +43,7 @@ const ReportedBlog = () => {
 
       if (response.data.success) {
         console.log('Reported posts:', response.data.data);
-        setReportedPosts(response.data.data);
+      setReportedPosts(response.data.data);
       } else {
         setError('Failed to fetch reported posts');
       }
@@ -61,7 +61,7 @@ const ReportedBlog = () => {
       const response = await axios.delete(
         'http://localhost:5000/api/posts/removepost',
         {
-          headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
           data: { postId }
         }
       );

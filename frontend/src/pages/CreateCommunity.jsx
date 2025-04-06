@@ -73,10 +73,10 @@ const CreateCommunity = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user'));
-
-      if (!token || !user) {
+      
+      if (!token) {
         setError('Please login to create a community');
+        setLoading(false);
         return;
       }
 
@@ -91,7 +91,7 @@ const CreateCommunity = () => {
         description: description.trim(),
         banner: imageUrl,
         category,
-        creator: user._id
+        autoJoin: true // Automatically join the user to their created community
       };
 
       const response = await axios.post(
@@ -106,7 +106,7 @@ const CreateCommunity = () => {
       );
 
       if (response.data.success) {
-        toast.success('Community created successfully!', {
+        toast.success('Community created and joined successfully!', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,

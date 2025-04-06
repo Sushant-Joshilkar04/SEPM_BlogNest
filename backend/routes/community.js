@@ -13,7 +13,7 @@ communityRouter.delete('/deletecommunity',auth,isUser,deleteCommunity);
 communityRouter.post('/updatecommunityname',auth,isUser,updateCommunityName);
 communityRouter.post('/updatecommunitydescription',auth,isUser,updateCommunityDescription);
 communityRouter.post('/joincommunity',auth,isUser,joinCommunity);
-communityRouter.delete('/leavecommunity',auth,isUser,leaveCommunity);
-communityRouter.get('/getUserCommunities/:userId', auth, getUserCommunities);
+communityRouter.post('/leavecommunity',auth,isUser,leaveCommunity);
+communityRouter.get('/getUserCommunities', auth, isUser, getUserCommunities);
 
 module.exports = communityRouter;

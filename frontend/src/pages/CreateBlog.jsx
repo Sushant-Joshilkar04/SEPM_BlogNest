@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   TextField, 
   Button, 
@@ -18,14 +18,18 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Tooltip,
+  Divider,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Plus, Image as ImageIcon, Bold, Italic } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Uploadfile from '../utils/UploadFile';
 import { UserDock } from '../components/Dock';
 import Groq from "groq-sdk"; 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreateBlog = () => {
   const navigate = useNavigate();
@@ -45,6 +49,7 @@ const CreateBlog = () => {
   const [openAIDialog, setOpenAIDialog] = useState(false);
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const contentEditorRef = useRef(null);
 
   const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true });
 
@@ -82,7 +87,7 @@ const CreateBlog = () => {
 
   const fetchCommunities = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/community/getallcommunities', {
+      const response = await axios.get('http://localhost:5000/api/community/getUserCommunities', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -91,7 +96,8 @@ const CreateBlog = () => {
         setCommunities(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching communities:', error);
+      console.error('Error fetching user communities:', error);
+      toast.error('Failed to load your communities');
     }
   };
 
@@ -138,6 +144,77 @@ const CreateBlog = () => {
 
   const handleRemoveTag = (tagToRemove) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  // Function to handle formatting
+  const applyFormatting = (format) => {
+    const textarea = contentEditorRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    let newContent = content;
+    
+    let prefix = '';
+    let suffix = '';
+    
+    switch (format) {
+      case 'bold':
+        prefix = '**';
+        suffix = '**';
+        break;
+      case 'italic':
+        prefix = '_';
+        suffix = '_';
+        break;
+      default:
+        return;
+    }
+    
+    newContent = 
+      content.substring(0, start) + 
+      prefix + selectedText + suffix + 
+      content.substring(end);
+    
+    setContent(newContent);
+    
+    // Focus back on textarea after formatting
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+    }, 0);
+  };
+  
+  // Handle keyboard shortcuts
+  const handleKeyDown = (e) => {
+    if (e.ctrlKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          applyFormatting('bold');
+          break;
+        case 'i':
+          e.preventDefault();
+          applyFormatting('italic');
+          break;
+        default:
+          break;
+      }
+    }
+  };
+  
+  // Function to convert markdown to HTML (for preview)
+  const parseMarkdown = (text) => {
+    if (!text) return '';
+    
+    // Bold: **text** or __text__
+    let formattedText = text.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+    
+    // Italic: *text* or _text_
+    formattedText = formattedText.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>');
+    
+    return formattedText;
   };
 
   const handleSubmit = async (isDraft = false) => {
@@ -550,195 +627,250 @@ const CreateBlog = () => {
                       }}
                     >
                       <MenuItem value="">None</MenuItem>
-                      {communities.map((comm) => (
-                        <MenuItem key={comm._id} value={comm._id}>
-                          {comm.name}
+                      {communities.length === 0 ? (
+                        <MenuItem disabled value="">
+                          <em>Join communities to post there</em>
                         </MenuItem>
-                      ))}
+                      ) : (
+                        communities.map((comm) => (
+                          <MenuItem key={comm._id} value={comm._id}>
+                            {comm.name}
+                          </MenuItem>
+                        ))
+                      )}
                     </Select>
                   </FormControl>
 
-                <Box>
-                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
-                    Blog Content
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setOpenAIDialog(true)}
-                    sx={{
-                      mb: 2,
-                      color: "#2D31FA",
-                      borderColor: "rgba(45, 49, 250, 0.5)",
-                      "&:hover": {
-                        borderColor: "#2D31FA",
-                        bgcolor: "rgba(45, 49, 250, 0.04)"
-                      }
-                    }}
-                  >
-                    Generate using AI ✨
-                  </Button>
-                  <TextField
-                    multiline
-                    rows={8}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={!content.trim()}
-                    helperText={!content.trim() ? 'Content is required' : ''}
-                    placeholder="Write your blog content here..."
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#2D31FA"
-                        }
-                      },
-                      "& .MuiInputLabel-root.Mui-focused": {
-                        color: "#2D31FA"
-                      }
-                    }}
-                  />
-                </Box>
-
-                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleSubmit(false)}
-                      disabled={loading || !title.trim() || !content.trim() || !banner}
-                      fullWidth
-                      sx={{
-                        bgcolor: "#2D31FA",
-                        py: 1.5,
-                        borderRadius: "50px",
-                        textTransform: "none",
-                        fontSize: "1rem",
-                        fontWeight: 600,
-                        boxShadow: "0 4px 10px rgba(45, 49, 250, 0.3)",
-                        "&:hover": {
-                          bgcolor: "#2024c9",
-                        },
-                        "&.Mui-disabled": {
-                          bgcolor: "rgba(45, 49, 250, 0.4)",
-                          color: "#fff"
-                        }
-                      }}
-                      startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
-                    >
-                      {loading ? 'Publishing...' : 'Publish Blog'}
-                    </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
-                    <Button
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                      Blog Content
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Tooltip title="Bold (Ctrl+B)">
+                          <IconButton 
+                            onClick={() => applyFormatting('bold')}
+                            size="small"
+                            sx={{
+                              color: "#2D31FA",
+                              "&:hover": { bgcolor: "rgba(45, 49, 250, 0.08)" }
+                            }}
+                          >
+                            <Bold size={18} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Italic (Ctrl+I)">
+                          <IconButton 
+                            onClick={() => applyFormatting('italic')}
+                            size="small"
+                            sx={{
+                              color: "#2D31FA",
+                              "&:hover": { bgcolor: "rgba(45, 49, 250, 0.08)" }
+                            }}
+                          >
+                            <Italic size={18} />
+                          </IconButton>
+                        </Tooltip>
+                        <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                      </Box>
+                      <Button
+                        variant="outlined"
+                        onClick={() => setOpenAIDialog(true)}
+                        sx={{
+                          color: "#2D31FA",
+                          borderColor: "rgba(45, 49, 250, 0.5)",
+                          "&:hover": {
+                            borderColor: "#2D31FA",
+                            bgcolor: "rgba(45, 49, 250, 0.04)"
+                          }
+                        }}
+                      >
+                        Generate using AI ✨
+                      </Button>
+                    </Box>
+                    <TextField
+                      inputRef={contentEditorRef}
+                      multiline
+                      rows={8}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       variant="outlined"
-                      onClick={() => handleSubmit(true)}
-                      disabled={loading}
                       fullWidth
+                      required
+                      error={!content.trim()}
+                      helperText={!content.trim() ? 'Content is required' : 'Use **text** for bold and _text_ for italic, or use Ctrl+B and Ctrl+I shortcuts'}
+                      placeholder="Write your blog content here..."
                       sx={{
-                        color: "#2D31FA",
-                        py: 1.5,
-                        borderRadius: "50px",
-                        borderColor: "rgba(45, 49, 250, 0.5)",
-                        textTransform: "none",
-                        fontSize: "1rem",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#2D31FA",
-                          bgcolor: "rgba(45, 49, 250, 0.04)"
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 2,
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#2D31FA"
+                          }
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#2D31FA"
                         }
                       }}
-                    >
-                      Save as Draft
-                    </Button>
-                  </motion.div>
-                </Box>
-              </Box>
-            </Paper>
-          </motion.div>
-        </Box>
-      </Container>
+                    />
+                    
+                    {content && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "#333" }}>
+                          Preview
+                        </Typography>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            bgcolor: "rgba(45, 49, 250, 0.02)",
+                            border: "1px solid rgba(45, 49, 250, 0.08)"
+                          }}
+                        >
+                          <div dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }}></div>
+                        </Paper>
+                      </Box>
+                    )}
 
-      {/* AI Content Generation Dialog */}
-      <Dialog 
-        open={openAIDialog} 
-        onClose={() => setOpenAIDialog(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 25px rgba(77, 97, 252, 0.15)",
-          }
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 600 }}>Generate Blog Content with AI</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            value={genAiInput}
-            onChange={(e) => setGenAiInput(e.target.value)}
-            placeholder="Enter your prompt for the AI..."
-            sx={{ mb: 2, mt: 1 }}
-          />
-          
-          {generatedContent && (
+                    <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleSubmit(false)}
+                          disabled={loading || !title.trim() || !content.trim() || !banner}
+                          fullWidth
+                          sx={{
+                            bgcolor: "#2D31FA",
+                            py: 1.5,
+                            borderRadius: "50px",
+                            textTransform: "none",
+                            fontSize: "1rem",
+                            fontWeight: 600,
+                            boxShadow: "0 4px 10px rgba(45, 49, 250, 0.3)",
+                            "&:hover": {
+                              bgcolor: "#2024c9",
+                            },
+                            "&.Mui-disabled": {
+                              bgcolor: "rgba(45, 49, 250, 0.4)",
+                              color: "#fff"
+                            }
+                          }}
+                          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                        >
+                          {loading ? 'Publishing...' : 'Publish Blog'}
+                        </Button>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
+                        <Button
+                          variant="outlined"
+                          onClick={() => handleSubmit(true)}
+                          disabled={loading}
+                          fullWidth
+                          sx={{
+                            color: "#2D31FA",
+                            py: 1.5,
+                            borderRadius: "50px",
+                            borderColor: "rgba(45, 49, 250, 0.5)",
+                            textTransform: "none",
+                            fontSize: "1rem",
+                            fontWeight: 600,
+                            "&:hover": {
+                              borderColor: "#2D31FA",
+                              bgcolor: "rgba(45, 49, 250, 0.04)"
+                            }
+                          }}
+                        >
+                          Save as Draft
+                        </Button>
+                      </motion.div>
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+            </motion.div>
+          </Box>
+        </Container>
+
+        {/* AI Content Generation Dialog */}
+        <Dialog 
+          open={openAIDialog} 
+          onClose={() => setOpenAIDialog(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              boxShadow: "0 8px 25px rgba(77, 97, 252, 0.15)",
+            }
+          }}
+        >
+          <DialogTitle sx={{ fontWeight: 600 }}>Generate Blog Content with AI</DialogTitle>
+          <DialogContent>
             <TextField
               fullWidth
               multiline
-              rows={8}
-              value={generatedContent}
-              InputProps={{ readOnly: true }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: "rgba(77, 97, 252, 0.02)"
-                }
-              }}
+              rows={3}
+              value={genAiInput}
+              onChange={(e) => setGenAiInput(e.target.value)}
+              placeholder="Enter your prompt for the AI..."
+              sx={{ mb: 2, mt: 1 }}
             />
-          )}
-          
-          {isGenerating && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-              <CircularProgress sx={{ color: "#2D31FA" }} />
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2.5, pt: 0 }}>
-          <Button 
-            onClick={() => setOpenAIDialog(false)}
-            sx={{ color: "text.secondary" }}
-          >
-            Cancel
-          </Button>
-          {!generatedContent ? (
-            <Button
-              onClick={generateUsingAi}
-              disabled={isGenerating || !genAiInput.trim()}
-              variant="contained"
-              sx={{
-                bgcolor: "#2D31FA",
-                "&:hover": { bgcolor: "#2024c9" }
-              }}
+            
+            {generatedContent && (
+              <TextField
+                fullWidth
+                multiline
+                rows={8}
+                value={generatedContent}
+                InputProps={{ readOnly: true }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(77, 97, 252, 0.02)"
+                  }
+                }}
+              />
+            )}
+            
+            {isGenerating && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                <CircularProgress sx={{ color: "#2D31FA" }} />
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5, pt: 0 }}>
+            <Button 
+              onClick={() => setOpenAIDialog(false)}
+              sx={{ color: "text.secondary" }}
             >
-              Generate
+              Cancel
             </Button>
-          ) : (
-            <Button
-              onClick={handleAcceptContent}
-              variant="contained"
-              sx={{
-                bgcolor: "#2D31FA",
-                "&:hover": { bgcolor: "#2024c9" }
-              }}
-            >
-              Use This Content
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+            {!generatedContent ? (
+              <Button
+                onClick={generateUsingAi}
+                disabled={isGenerating || !genAiInput.trim()}
+                variant="contained"
+                sx={{
+                  bgcolor: "#2D31FA",
+                  "&:hover": { bgcolor: "#2024c9" }
+                }}
+              >
+                Generate
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAcceptContent}
+                variant="contained"
+                sx={{
+                  bgcolor: "#2D31FA",
+                  "&:hover": { bgcolor: "#2024c9" }
+                }}
+              >
+                Use This Content
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
 
         {/* Wave Background - Bottom */}
         <Box
