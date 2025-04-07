@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminDock } from '../components/Dock';
 import axios from 'axios';
@@ -22,10 +23,17 @@ const ReportedBlog = () => {
   const [reportedPosts, setReportedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [blogId,setBlogId] = useState('');
 
   useEffect(() => {
     fetchReportedPosts();
   }, []);
+
+  function clickhandler() {
+    console.log("clicked");
+    navigate(`/blog/${blogId}`);
+  }
 
     const fetchReportedPosts = async () => {
       try {
@@ -43,6 +51,7 @@ const ReportedBlog = () => {
 
       if (response.data.success) {
         console.log('Reported posts:', response.data.data);
+        setBlogId(response.data.data[0]._id);
       setReportedPosts(response.data.data);
       } else {
         setError('Failed to fetch reported posts');
@@ -226,6 +235,7 @@ const ReportedBlog = () => {
                       boxShadow: "0 12px 30px rgba(45, 49, 250, 0.15)",
                     }
                   }}
+                  onClick={clickhandler}
                 >
                   <CardMedia
                     component="img"

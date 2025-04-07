@@ -1,14 +1,19 @@
 import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const ProtectedRoute = ({ children, adminRoute = false, userRoute = false }) => {
+const ProtectedRoute = ({route='', children, adminRoute = false, userRoute = false }) => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = user.role;
-
+  
   if (!token) {
     toast.error('Please login first');
     return <Navigate to="/auth" replace />;
+  }
+
+  if(route=='/blog' && (userRoute || adminRoute))
+  {
+    return children;
   }
 
   // Check for admin routes

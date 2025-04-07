@@ -33,7 +33,9 @@ const Blog = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [isLiked, setIsLiked] = useState(false);
   const [isReported, setIsReported] = useState(false);
+  const role = JSON.parse(localStorage.getItem('user')).role;
 
+  console.log(role);
   useEffect(() => {
     fetchPost();
   }, [id]);
@@ -65,7 +67,12 @@ const Blog = () => {
   const checkUserInteractions = async () => {
     try {
       const token = localStorage.getItem('token');
+      
       if (!token) return;
+      if(role=='admin')
+      {
+        return;
+      }
 
       // Check if user has liked the post
       const likeResponse = await axios.get(
@@ -375,6 +382,8 @@ const Blog = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <motion.div whileHover={{ scale: 1.1 }}>
+                    {
+                      (role!='admin') && 
                     <IconButton 
                       onClick={handleLike}
                       sx={{
@@ -390,13 +399,18 @@ const Blog = () => {
                         <ThumbUpOffAlt sx={{ color: "#888", fontSize: 22 }} />
                       )}
                     </IconButton>
+}
                   </motion.div>
-                  <Typography variant="body2" fontWeight="500" sx={{ color: "#555" }}>
+                  {
+                    (role!='admin') &&  <Typography variant="body2" fontWeight="500" sx={{ color: "#555" }}>
                     {post.likes || 0} likes
                   </Typography>
+                  }
                 </Box>
                 
                 <motion.div whileHover={{ scale: 1.1 }}>
+                  {
+                    (role!='admin') && 
                   <IconButton 
                     onClick={() => setReportDialogOpen(true)}
                     sx={{
@@ -411,6 +425,7 @@ const Blog = () => {
                       <FlagOutlined sx={{ color: "#888", fontSize: 22 }} />
                     )}
                   </IconButton>
+                }
                 </motion.div>
               </Box>
             </motion.div>

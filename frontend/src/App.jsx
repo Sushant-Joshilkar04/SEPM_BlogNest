@@ -24,26 +24,23 @@ import Admin_ManageUser from './Admin_Components/Admin_manageUser';
 import CreateCommunity from './pages/CreateCommunity';
 import CommunityBlogs from './pages/CommunityBlogs';
 
+const HeroWrapper = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return loading ? <Preloader /> : <Hero />;
+};
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
   const is404Page = location.pathname !== '/' && !Object.keys(routes).includes(location.pathname);
   
-  const hasDock = [
-    '/dashboard',
-    '/join-community',
-    '/create-blog',
-    '/profile',
-    '/admin',
-    '/admin/reported-posts',
-    '/admin/manage-users',
-    '/blog',
-    '/community',
-    '/create-community',
-    '/profile/blog'
-  ].some(path => location.pathname.startsWith(path));
-  
-
   if (is404Page) {
     return children;
   }
@@ -53,10 +50,10 @@ const AppLayout = ({ children }) => {
       <header className="sticky top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <Navbar />
       </header>
-      <main className={`flex-grow ${hasDock ? 'pb-20' : ''}`}>
+      <main className="flex-grow">
         {children}
       </main>
-      {!hasDock && <Footer />}
+      <Footer />
     </div>
   );
 };
@@ -83,48 +80,34 @@ const routes = {
 };
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <Router>
-      {loading ? (
-        <Preloader />
-      ) : (
-        <div className="min-h-screen bg-gray-50">
-          <ClickSpark />
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<Hero />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
+      <div className="min-h-screen bg-gray-50">
+        <ClickSpark />
+        <AppLayout>
+          <Routes>
+            <Route path="/" element={<HeroWrapper />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
 
-              <Route path="/admin" element={<ProtectedRoute adminRoute={true}><Admin /></ProtectedRoute>} />
-              <Route path="/admin/reported-posts" element={<ProtectedRoute adminRoute={true}><ReportedBlog /></ProtectedRoute>} />
-              <Route path="/admin/manage-users" element={<ProtectedRoute adminRoute={true}><Admin_ManageUser /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute adminRoute={true}><Admin /></ProtectedRoute>} />
+            <Route path="/admin/reported-posts" element={<ProtectedRoute adminRoute={true}><ReportedBlog /></ProtectedRoute>} />
+            <Route path="/admin/manage-users" element={<ProtectedRoute adminRoute={true}><Admin_ManageUser /></ProtectedRoute>} />
 
-              <Route path="/dashboard" element={<ProtectedRoute userRoute={true}><Dashboard /></ProtectedRoute>} />
-              <Route path="/join-community" element={<ProtectedRoute userRoute={true}><Community /></ProtectedRoute>} />
-              <Route path="/create-blog" element={<ProtectedRoute userRoute={true}><CreateBlog /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute userRoute={true}><Profile /></ProtectedRoute>} />
-              <Route path="/blog/:id" element={<ProtectedRoute userRoute={true}><Blog /></ProtectedRoute>} />
-              <Route path="/profile/blog/:id" element={<ProtectedRoute userRoute={true}><UserBlog /></ProtectedRoute>} />
-              <Route path="/create-community" element={<ProtectedRoute userRoute={true}><CreateCommunity /></ProtectedRoute>} />
-              <Route path="/community" element={<ProtectedRoute userRoute={true}><Community /></ProtectedRoute>} />
-              <Route path="/community/:communityId/blogs" element={<ProtectedRoute userRoute={true}><CommunityBlogs /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
-        </div>
-      )}
+            <Route path="/dashboard" element={<ProtectedRoute userRoute={true}><Dashboard /></ProtectedRoute>} />
+            <Route path="/join-community" element={<ProtectedRoute userRoute={true}><Community /></ProtectedRoute>} />
+            <Route path="/create-blog" element={<ProtectedRoute userRoute={true}><CreateBlog /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute userRoute={true}><Profile /></ProtectedRoute>} />
+            <Route path="/blog/:id" element={<ProtectedRoute route={'/blog'} userRoute={true} adminRoute={true} ><Blog /></ProtectedRoute>} />
+            <Route path="/profile/blog/:id" element={<ProtectedRoute userRoute={true}><UserBlog /></ProtectedRoute>} />
+            <Route path="/create-community" element={<ProtectedRoute userRoute={true}><CreateCommunity /></ProtectedRoute>} />
+            <Route path="/community" element={<ProtectedRoute userRoute={true}><Community /></ProtectedRoute>} />
+            <Route path="/community/:communityId/blogs" element={<ProtectedRoute userRoute={true}><CommunityBlogs /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AppLayout>
+      </div>
     </Router>
   );
 };

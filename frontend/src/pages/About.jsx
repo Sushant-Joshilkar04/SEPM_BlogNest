@@ -4,21 +4,27 @@ import { motion } from 'framer-motion';
 
 const teamMembers = [
   {
-    name: 'John Doe',
-    role: 'Founder & CEO',
-    image: 'https://source.unsplash.com/random/200x200?face-1',
+    name: 'Onkar Jondhale',
+    role: 'Backend Developer',
+    image: 'https://api.dicebear.com/9.x/initials/svg?seed=O',
     description: 'Passionate about creating meaningful content platforms.',
   },
   {
-    name: 'Jane Smith',
-    role: 'Chief Editor',
-    image: 'https://source.unsplash.com/random/200x200?face-2',
+    name: 'Sushant Joshilkar',
+    role: 'Frontend Developer',
+    image: 'https://api.dicebear.com/9.x/initials/svg?seed=S',
     description: 'Expert in content curation and editorial strategy.',
   },
   {
-    name: 'Mike Johnson',
-    role: 'Tech Lead',
-    image: 'https://source.unsplash.com/random/200x200?face-3',
+    name: 'Sujal Kamble',
+    role: 'UI/UX Designer',
+    image: 'https://api.dicebear.com/9.x/initials/svg?seed=Su',
+    description: 'Bringing innovative solutions to content delivery.',
+  },
+  {
+    name: 'Jayesh Joshi',
+    role: 'UI/UX Designer',
+    image: 'https://api.dicebear.com/9.x/initials/svg?seed=J',
     description: 'Bringing innovative solutions to content delivery.',
   },
 ];
