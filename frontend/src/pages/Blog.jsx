@@ -226,6 +226,12 @@ const Blog = () => {
     }
   };
 
+  const formatText = (text) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>');
+  };
+
   if (loading) {
     return (
       <Box 
@@ -373,9 +379,8 @@ const Blog = () => {
                   fontSize: "1.05rem",
                   whiteSpace: "pre-line"
                 }}
-              >
-                {post.content}
-              </Typography>
+                dangerouslySetInnerHTML={{ __html: formatText(post.content) }}
+              />
 
               <Divider sx={{ my: 4, borderColor: "rgba(0, 0, 0, 0.08)" }} />
 

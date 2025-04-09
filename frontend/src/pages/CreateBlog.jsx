@@ -245,7 +245,7 @@ const CreateBlog = () => {
         "http://localhost:5000/api/posts/createpost",
         blogData,
         {
-          headers: {
+        headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           }
@@ -319,9 +319,9 @@ const CreateBlog = () => {
         />
 
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             <Typography
@@ -334,8 +334,8 @@ const CreateBlog = () => {
                 letterSpacing: "0.02em",
               }}
             >
-              Create New Blog
-            </Typography>
+            Create New Blog
+          </Typography>
           </motion.div>
 
           <AnimatePresence>
@@ -413,13 +413,13 @@ const CreateBlog = () => {
                   },
                   boxShadow: "0 8px 25px rgba(77, 97, 252, 0.08)"
                 }}
-              >
-                {preview ? (
+            >
+              {preview ? (
                   <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
                     <Box
                       component="img"
-                      src={preview}
-                      alt="Preview"
+                    src={preview} 
+                    alt="Preview" 
                       sx={{
                         width: "100%",
                         height: "350px",
@@ -427,9 +427,9 @@ const CreateBlog = () => {
                         borderRadius: 2,
                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)"
                       }}
-                    />
-                    <IconButton
-                      onClick={handleRemoveImage}
+                  />
+                  <IconButton
+                    onClick={handleRemoveImage}
                       sx={{
                         position: "absolute",
                         top: 8,
@@ -459,30 +459,30 @@ const CreateBlog = () => {
                     >
                       <ImageIcon size={64} className="mx-auto mb-4" style={{ color: "rgba(77, 97, 252, 0.6)" }} />
                       <Typography variant="h6" color="#333" gutterBottom fontWeight={600}>
-                        Upload Blog Banner
-                      </Typography>
+                    Upload Blog Banner
+                  </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
                         Drag and drop or click to select (Max 5MB)
-                      </Typography>
+                  </Typography>
                     </motion.div>
                   </Box>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="banner-upload"
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="banner-upload"
                   style={{ display: "none" }}
-                />
-                <label htmlFor="banner-upload">
+              />
+              <label htmlFor="banner-upload">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Button
-                      variant="outlined"
-                      component="span"
+                <Button
+                  variant="outlined"
+                  component="span"
                       startIcon={<Upload size={18} />}
                       sx={{
                         mt: 2,
@@ -495,9 +495,9 @@ const CreateBlog = () => {
                       }}
                     >
                       {preview ? "Change Image" : "Select Image"}
-                    </Button>
+                </Button>
                   </motion.div>
-                </label>
+              </label>
               </Paper>
             </motion.div>
 
@@ -518,13 +518,13 @@ const CreateBlog = () => {
                 }}
               >
                 <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                  <TextField
-                    label="Blog Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    required
+              <TextField
+                label="Blog Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                variant="outlined"
+                fullWidth
+                required
                     error={!title.trim()}
                     helperText={!title.trim() ? 'Title is required' : ''}
                     placeholder="Enter an engaging title for your blog"
@@ -562,7 +562,7 @@ const CreateBlog = () => {
                       ))}
                     </Box>
                     <Box sx={{ display: "flex", gap: 1 }}>
-                      <TextField
+              <TextField
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         onKeyPress={(e) => {
@@ -572,9 +572,9 @@ const CreateBlog = () => {
                           }
                         }}
                         placeholder="Add a tag and press enter"
-                        variant="outlined"
+                variant="outlined"
                         size="small"
-                        fullWidth
+                fullWidth
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
@@ -613,8 +613,8 @@ const CreateBlog = () => {
                     </InputLabel>
                     <Select
                       labelId="community-select-label"
-                      value={community}
-                      onChange={(e) => setCommunity(e.target.value)}
+                value={community}
+                onChange={(e) => setCommunity(e.target.value)}
                       label="Community (Optional)"
                       sx={{
                         borderRadius: 2,
@@ -674,7 +674,7 @@ const CreateBlog = () => {
                         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                       </Box>
                       <Button
-                        variant="outlined"
+                variant="outlined"
                         onClick={() => setOpenAIDialog(true)}
                         sx={{
                           color: "#2D31FA",
@@ -688,16 +688,16 @@ const CreateBlog = () => {
                         Generate using AI ✨
                       </Button>
                     </Box>
-                    <TextField
+              <TextField
                       inputRef={contentEditorRef}
                       multiline
                       rows={8}
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      variant="outlined"
-                      fullWidth
-                      required
+                variant="outlined"
+                fullWidth
+                required
                       error={!content.trim()}
                       helperText={!content.trim() ? 'Content is required' : 'Use **text** for bold and _text_ for italic, or use Ctrl+B and Ctrl+I shortcuts'}
                       placeholder="Write your blog content here..."
@@ -735,11 +735,11 @@ const CreateBlog = () => {
 
                     <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                       <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
-                        <Button
-                          variant="contained"
-                          onClick={() => handleSubmit(false)}
+                <Button
+                  variant="contained"
+                  onClick={() => handleSubmit(false)}
                           disabled={loading || !title.trim() || !content.trim() || !banner}
-                          fullWidth
+                  fullWidth
                           sx={{
                             bgcolor: "#2D31FA",
                             py: 1.5,
@@ -757,16 +757,16 @@ const CreateBlog = () => {
                             }
                           }}
                           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
-                        >
-                          {loading ? 'Publishing...' : 'Publish Blog'}
-                        </Button>
+                >
+                  {loading ? 'Publishing...' : 'Publish Blog'}
+                </Button>
                       </motion.div>
                       <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{ flexGrow: 1 }}>
-                        <Button
-                          variant="outlined"
-                          onClick={() => handleSubmit(true)}
-                          disabled={loading}
-                          fullWidth
+                <Button
+                  variant="outlined"
+                  onClick={() => handleSubmit(true)}
+                  disabled={loading}
+                  fullWidth
                           sx={{
                             color: "#2D31FA",
                             py: 1.5,
@@ -780,9 +780,9 @@ const CreateBlog = () => {
                               bgcolor: "rgba(45, 49, 250, 0.04)"
                             }
                           }}
-                        >
-                          Save as Draft
-                        </Button>
+                >
+                  Save as Draft
+                </Button>
                       </motion.div>
                     </Box>
                   </Box>
