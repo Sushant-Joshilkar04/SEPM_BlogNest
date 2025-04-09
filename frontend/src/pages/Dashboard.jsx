@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Chip, CircularProgress, Card, CardContent, CardMedia, Grid, TextField, InputAdornment } from '@mui/material';
+import { Box, Container, Typography, Chip, CircularProgress, Card, CardContent, CardMedia, Grid, TextField, InputAdornment, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -98,109 +98,38 @@ const Dashboard = () => {
       />
 
       <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1, pt: 8, pb: 4 }}>
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Typography
-            variant="h3"
-            fontWeight="700"
-            color="#2D31FA"
-            sx={{
-              textAlign: "center",
-              mb: 4,
-              letterSpacing: "0.02em",
-            }}
+        <Box sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+          mb: 4,
+          gap: 2
+        }}>
+          {/* Title on left */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            Latest Articles
-          </Typography>
-        </motion.div>
+            <Typography
+              variant="h4"
+              fontWeight="700"
+              color="#2D31FA"
+              sx={{
+                letterSpacing: "0.02em",
+              }}
+            >
+              Latest Articles
+            </Typography>
+          </motion.div>
 
-        {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <Box sx={{ 
-            mb: 4, 
-            display: "flex", 
-            flexDirection: { xs: "column", sm: "row" }, 
-            alignItems: { xs: "stretch", sm: "center" }, 
-            gap: 2,
-            flexWrap: "wrap",
-            justifyContent: "space-between"
-          }}>
-            {/* Tags filter - Now on the left */}
-            <Box sx={{ 
-              display: "flex", 
-              flexWrap: "wrap", 
-              gap: 1,
-              flex: { xs: 1, sm: "auto" },
-              alignItems: "center",
-              order: { xs: 2, sm: 1 }
-            }}>
-              <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
-                Tags:
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8 }}>
-                {allTags.slice(0, 10).map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    onClick={() => handleTagToggle(tag)}
-                    sx={{ 
-                      background: activeTags.includes(tag) ? "#2D31FA" : "rgba(45, 49, 250, 0.06)",
-                      color: activeTags.includes(tag) ? "white" : "#2D31FA",
-                      fontWeight: 500,
-                      fontSize: "0.75rem",
-                      height: "24px",
-                      transition: "all 0.2s ease",
-                      '&:hover': {
-                        background: activeTags.includes(tag) ? "#2024c9" : "rgba(45, 49, 250, 0.12)",
-                        transform: "translateY(-2px)",
-                        boxShadow: "0 3px 5px rgba(45, 49, 250, 0.2)"
-                      }
-                    }}
-                  />
-                ))}
-                {allTags.length > 10 && (
-                  <Chip
-                    label={`+${allTags.length - 10} more`}
-                    size="small"
-                    variant="outlined"
-                    sx={{ 
-                      borderColor: "rgba(45, 49, 250, 0.3)",
-                      color: "#2D31FA",
-                      fontSize: "0.75rem",
-                      height: "24px"
-                    }}
-                  />
-                )}
-              </Box>
-              {activeTags.length > 0 && (
-                <Chip
-                  label="Clear"
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setActiveTags([])}
-                  sx={{ 
-                    borderColor: "#ff4081",
-                    color: "#ff4081",
-                    fontSize: "0.75rem",
-                    height: "24px",
-                    ml: 1,
-                    '&:hover': {
-                      background: "rgba(255, 64, 129, 0.08)",
-                    }
-                  }}
-                />
-              )}
-            </Box>
-
-            {/* Search field - Now on the right */}
+          {/* Search in middle */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ flex: 1, display: 'flex', justifyContent: 'center' }}
+          >
             <TextField
               placeholder="Search articles..."
               value={searchQuery}
@@ -208,10 +137,9 @@ const Dashboard = () => {
               variant="outlined"
               size="small"
               sx={{
-                width: { xs: "100%", sm: "300px" },
-                order: { xs: 1, sm: 2 },
+                width: "400px",
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 8,
+                  borderRadius: 2,
                   bgcolor: "white",
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#2D31FA"
@@ -226,8 +154,69 @@ const Dashboard = () => {
                 ),
               }}
             />
-          </Box>
-        </motion.div>
+          </motion.div>
+
+          {/* Tags on right */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <FormControl size="small" sx={{ width: "200px" }}>
+              <InputLabel id="tags-select-label">Select Tags</InputLabel>
+              <Select
+                labelId="tags-select-label"
+                multiple
+                value={activeTags}
+                onChange={(event) => setActiveTags(event.target.value)}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        size="small"
+                        sx={{
+                          background: "#2D31FA",
+                          color: "white",
+                          fontSize: "0.75rem"
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
+                sx={{
+                  bgcolor: "white",
+                }}
+              >
+                {allTags.map((tag) => (
+                  <MenuItem key={tag} value={tag}>
+                    {tag}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {activeTags.length > 0 && (
+              <Chip
+                label="Clear"
+                size="small"
+                variant="outlined"
+                onClick={() => setActiveTags([])}
+                sx={{ 
+                  borderColor: "#ff4081",
+                  color: "#ff4081",
+                  fontSize: "0.75rem",
+                  height: "24px",
+                  '&:hover': {
+                    background: "rgba(255, 64, 129, 0.08)",
+                  }
+                }}
+              />
+            )}
+          </motion.div>
+        </Box>
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
