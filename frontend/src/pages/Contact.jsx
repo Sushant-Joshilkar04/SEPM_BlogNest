@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import EmailIcon from '@mui/icons-material/Email';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -30,11 +31,41 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  console.log(formData)
+  const serviceID = 'service_o2sxuja';
+  const templateID = 'template_ubg6mnh';
+  const publicKey = 'w1tSitK2IZs5W-kEe';
+
+  const data = `
+     Name: ${formData.name}
+     Email: ${formData.email}
+     Subject: ${formData.subject}
+     Message: ${formData.message}
+  `
+
+  const templateParams = {
+    from_name: formData.name,
+    from_email: formData.email,
+    subject: formData.subject,
+    message: data,
+    to_email: 'sushant.joshilkar22@pccoepune.org',
   };
+
+  try {
+    await emailjs.send(serviceID, templateID, templateParams, publicKey);
+    alert('Email sent successfully!');
+    setFormData({ name: '', email: '', subject: '', message: '' });
+  } catch (error) {
+    console.error('Email sending error:', error);
+    alert('Failed to send email.');
+  }
+};
+
 
   const contactInfo = [
     {
