@@ -76,12 +76,12 @@ const handleSubmit = async (e) => {
     {
       icon: <PhoneIcon sx={{ fontSize: 40, color: '#2D31FA' }} />,
       title: 'Phone',
-      content: '+1 (555) 123-4567',
+      content: '+91 9565545545',
     },
     {
       icon: <LocationOnIcon sx={{ fontSize: 40, color: '#2D31FA' }} />,
       title: 'Address',
-      content: '123 Blog Street, Content City, ST 12345',
+      content: 'Pune, Maharashtra, India ',
     },
   ];
 

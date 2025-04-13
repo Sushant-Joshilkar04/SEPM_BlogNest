@@ -1,7 +1,7 @@
 import { Box, Button, Typography, Grid, Container } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import heroImage from "../assets/image.png";
+import heroImage from "../assets/Hero.gif";
 
 const Hero = () => {
   const navigate = useNavigate();

@@ -37,7 +37,7 @@ const connectCloudinary = ()=>{
 connectCloudinary();
     
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(fileUpload({
     useTempFiles : true,
     tempFileDir : "/tmp/"
